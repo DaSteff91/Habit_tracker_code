@@ -4,7 +4,6 @@ from database.operations import DatabaseController
 
 class Habit:
     """Habit data model with database operations and business logic"""
-
     def __init__(self, 
                  name: str,
                  category: str,
@@ -15,8 +14,10 @@ class Habit:
                  repeat: str,
                  tasks: int,
                  tasks_description: str,
+                 habit_id: int = None,
                  db_controller: Optional[DatabaseController] = None):
         # Core properties
+        self.id = habit_id
         self.name = name
         self.category = category
         self.description = description
@@ -26,13 +27,9 @@ class Habit:
         self.repeat = repeat
         self.tasks = tasks
         self.tasks_description = tasks_description
-        
-        # Tracking properties
         self.streak = 0
         self.reset_count = 0
         self.created = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-        # Database access
         self.db_controller = db_controller or DatabaseController()
 
     # Class methods for creation/retrieval
@@ -74,8 +71,9 @@ class Habit:
 
     @classmethod
     def from_db_tuple(cls, db_tuple: tuple) -> 'Habit':
-        """Create from database record"""
+        """Create habit from database tuple"""
         habit = cls(
+            habit_id=db_tuple[0],
             name=db_tuple[1],
             category=db_tuple[2],
             description=db_tuple[3],
@@ -86,6 +84,7 @@ class Habit:
             tasks=db_tuple[9],
             tasks_description=db_tuple[10]
         )
+        # Set additional properties
         habit.streak = db_tuple[11]
         habit.reset_count = db_tuple[12]
         habit.created = db_tuple[4]
