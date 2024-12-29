@@ -3,16 +3,30 @@ import questionary
 from prettytable import PrettyTable
 from datetime import datetime
 from .core import BaseUI
-from habit_management import HabitManagement
-from ui_db_handler import UserInputHandler, InputValidator
+from controllers.habit import HabitController
+from utils.validators import HabitValidator
+
 
 class HabitManagementUI(BaseUI):
     """Habit management specific UI"""
-    def __init__(self):
+    def __init__(self, habit_controller=None):
         super().__init__()
-        self.habit_management = HabitManagement()
-        self.ui_handler = UserInputHandler()
-        self.validator = InputValidator()
+        self.habit_controller = habit_controller or HabitController()
+        self.validator = HabitValidator()
+        self.items_per_page = 15
+ 
+    def get_table_headers(self) -> List[str]:
+        """Return headers for habit management table"""
+        return [
+            'Name',
+            'Category',
+            'Description',
+            'Importance',
+            'Repeat',
+            'Start Date',
+            'End Date',
+            'Tasks'
+        ]
 
     def show_habit_management(self):
         """Show habit management menu and handle interactions"""
@@ -173,9 +187,41 @@ class HabitManagementUI(BaseUI):
             
         return self.confirm_and_process_update(update_info)
 
+    def display_habits_with_rows(self) -> Dict[int, int]:
+        """Display habits with row numbers"""
+        habits = self.db_controller.read_data('habit')
+        habit_id_map = {}
+        row_number = 1
+        
+        if not habits:
+            print("No habits found")
+            return {}, []
+        
+        table = PrettyTable()
+        table.field_names = ['Row'] + self.get_table_headers()
+        
+        for habit in habits:
+            habit_id_map[row_number] = habit[0]
+            table.add_row([
+                row_number,
+                habit[1],          # Name
+                habit[2],          # Category
+                habit[3],          # Description
+                habit[7],          # Importance
+                habit[8],          # Repeat
+                habit[5],          # Start Date
+                habit[6],          # End Date
+                habit[9]           # Tasks
+            ])
+            row_number += 1
+        
+        print("\nHabits Overview:")
+        print(table)
+        return habit_id_map, habits
+
     def get_habit_for_update(self) -> Optional[Dict]:
         """Get habit to update"""
-        habit_id_map, habits = self.habit_management.display_habits_with_rows()
+        habit_id_map, habits = self.display_habits_with_rows()
         if not habits:
             return None
             
@@ -252,19 +298,37 @@ class HabitManagementUI(BaseUI):
             style=self.style
         ).ask():
             for habit_id in selected:
-                if self.ui_handler.delete_habit(habit_id):
+                if self.habit_controller.delete_habit(habit_id):
                     print(f"Deleted habit {habit_id}")
                 else:
                     print(f"Failed to delete habit {habit_id}")
 
-    def handle_habit_deletion(self):
-        """Handle habit deletion workflow"""
+    def delete_habit(self):
+        """Delete habit workflow"""
         habits = self.get_habits_data()
         if not habits:
             print("\nNo habits found")
             return
             
-        choices = [
+        selected_habits = self.select_habits_for_deletion(habits)
+        if not selected_habits:
+            return
+            
+        if self.confirm_deletion(selected_habits):
+            self.process_habit_deletion(selected_habits)
+
+    def select_habits_for_deletion(self, habits: List[tuple]) -> List[int]:
+        """Get user selection for deletion"""
+        choices = self.prepare_deletion_choices(habits)
+        return questionary.checkbox(
+            "Select habits to delete:",
+            choices=choices,
+            style=self.style
+        ).ask()
+
+    def prepare_deletion_choices(self, habits: List[tuple]) -> List[Dict]:
+        """Prepare choices for deletion selection"""
+        return [
             {
                 "name": "Row {}: {} - {}".format(
                     idx,
@@ -276,23 +340,26 @@ class HabitManagementUI(BaseUI):
             }
             for idx, habit in enumerate(habits, 1)
         ]
-        
-        selected = questionary.checkbox(
-            "Select habits to delete:",
-            choices=choices,
-            style=self.style
-        ).ask()
-        
-        if selected and questionary.confirm(
-            "\nDelete {} habit(s)?".format(len(selected)),
+
+    def confirm_deletion(self, selected_habits: List[int]) -> bool:
+        """Get user confirmation for deletion"""
+        return questionary.confirm(
+            "\nDelete {} habit(s)?".format(len(selected_habits)),
             default=False,
             style=self.style
-        ).ask():
-            for habit_id in selected:
-                if self.ui_handler.delete_habit(habit_id):
-                    print("Successfully deleted habit {}".format(habit_id))
-                else:
-                    print("Failed to delete habit {}".format(habit_id))
+        ).ask()
+
+    def process_habit_deletion(self, habit_ids: List[int]) -> None:
+        """Process habit deletions and show results"""
+        for habit_id in habit_ids:
+            self.delete_single_habit(habit_id)
+
+    def delete_single_habit(self, habit_id: int) -> None:
+        """Delete single habit and show result"""
+        if self.habit_controller.delete_habit(habit_id):
+            print("Successfully deleted habit {}".format(habit_id))
+        else:
+            print("Failed to delete habit {}".format(habit_id))
 
     def validate_habit_data(self, data: Dict) -> bool:
         """Validate habit input data"""
@@ -450,8 +517,8 @@ class HabitManagementUI(BaseUI):
                 page = 1  # Reset to first page
 
     def get_habits_data(self) -> Optional[List[tuple]]:
-        """Fetch habits data"""
-        return self.ui_handler.db_controller.read_data('habit')
+        """Fetch habits data through controller"""
+        return self.habit_controller.get_habits()
 
     def get_total_pages(self, habits: List[tuple], items_per_page: int) -> int:
         """Calculate total pages"""

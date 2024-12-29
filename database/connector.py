@@ -1,7 +1,7 @@
 import sqlite3
 from typing import List, Tuple
 
-class Database:
+class DatabaseConnector:
     def __init__(self, db_name: str = "main.db"):
         """Initialize database connection"""
         self.db_name = db_name

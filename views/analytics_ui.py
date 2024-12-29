@@ -2,16 +2,49 @@ from typing import List, Tuple, Dict, Optional
 import questionary
 from prettytable import PrettyTable
 from .core import BaseUI
-from ui_db_handler import UserInputHandler
-from analytics_management import AnalyticsManagement
+from controllers.analytics import AnalyticsController
 
 class AnalyticsUI(BaseUI):
-    """Analytics specific UI handling"""
-    def __init__(self):
+    """Analytics specific UI"""
+    def __init__(self, analytics_controller=None):
         super().__init__()
-        self.ui_handler = UserInputHandler()
-        self.analytics_management = AnalyticsManagement()
+        self.analytics_controller = analytics_controller or AnalyticsController()
         self.current_sort = {'field': None, 'ascending': True}
+        self.items_per_page = 15
+
+    def display_paginated_analytics(self, habits: List[Dict], page: int, items_per_page: int) -> None:
+        """Display paginated analytics table"""
+        start_idx = (page - 1) * items_per_page
+        end_idx = start_idx + items_per_page
+        page_habits = habits[start_idx:end_idx]
+        
+        table = PrettyTable()
+        table.field_names = [
+            'Name', 'Category', 'Description', 'Repeat',
+            'Days Passed', 'Success Rate', 'Current Streak',
+            'Reset Count', 'Status'
+        ]
+        
+        for habit in page_habits:
+            days_passed = self.analytics_controller.calculate_passed_days(habit['start'])  # Changed key
+            success_rate = self.analytics_controller.calculate_success_rate(
+                habit['start'],  # Changed key
+                habit['repeat'],
+                habit['current_streak'],
+                habit['reset_count']
+            )
+            
+            table.add_row([
+                habit['name'],
+                habit['category'],
+                habit['description'],
+                habit['repeat'],
+                days_passed,
+                success_rate,
+                habit['current_streak'],
+                habit['reset_count'],
+                habit['status']
+            ])
 
     def show_analytics_menu(self):
         """Main analytics menu controller"""
@@ -57,16 +90,16 @@ class AnalyticsUI(BaseUI):
                 if filtered:
                     habits = filtered
                     page = 1
-    
-    def get_habits_data(self) -> Optional[List[tuple]]:
-        """Fetch habits data from database"""
-        return self.analytics_management.get_habits_data()
+
+    def get_habits_data(self) -> Optional[List[Dict]]:
+        """Fetch habits data through controller"""
+        return self.analytics_controller.get_analytics_data()
     
     def get_total_pages(self, habits: List[tuple], items_per_page: int) -> int:
         """Calculate total number of pages"""
         return (len(habits) + items_per_page - 1) // items_per_page
     
-    def handle_sort_habits(self, habits: List[tuple]) -> List[tuple]:
+    def handle_sort_habits(self, data: List[Dict]) -> List[Dict]:
         """Handle habit sorting workflow"""
         sort_by = questionary.select(
             "Sort by:",
@@ -86,14 +119,14 @@ class AnalyticsUI(BaseUI):
                     'field': sort_by.lower().replace(' ', '_'),
                     'ascending': order == "Ascending"
                 }
-                return self.ui_handler.sort_habits(
-                    habits,
+                return self.analytics_controller.sort_data(
+                    data,
                     self.current_sort['field'],
                     self.current_sort['ascending']
                 )
-        return habits
+        return data
 
-    def handle_filter_habits(self, habits: List[tuple]) -> Optional[List[tuple]]:
+    def handle_filter_habits(self, data: List[Dict]) -> Optional[List[Dict]]:
         """Handle habit filtering workflow"""
         field = questionary.select(
             "Select field to filter by:",
@@ -102,11 +135,11 @@ class AnalyticsUI(BaseUI):
         ).ask()
         
         if field:
-            values = self.get_unique_field_values(habits, field)
+            values = self.get_unique_field_values(data, field)
             values.append("Reset Filter")
             
             value = questionary.select(
-                "Select {} value:".format(field.lower()),
+                f"Select {field.lower()} value:",
                 choices=values,
                 style=self.style
             ).ask()
@@ -114,8 +147,12 @@ class AnalyticsUI(BaseUI):
             if value == "Reset Filter":
                 return self.get_habits_data()
                 
-            return self.ui_handler.filter_habits(habits, field.lower(), value)
-        return habits
+            return self.analytics_controller.filter_data(
+                data, 
+                field.lower(),
+                value
+            )
+        return data
 
     def get_sortable_fields(self) -> List[str]:
         """Return list of sortable fields"""
@@ -129,33 +166,6 @@ class AnalyticsUI(BaseUI):
         """Return list of filterable fields"""
         return ["Name", "Category", "Description", "Repeat", "Status"]
 
-    def display_paginated_analytics(self, habits: List[tuple], page: int, items_per_page: int) -> None:
-        """Display paginated analytics table"""
-        start_idx = (page - 1) * items_per_page
-        end_idx = start_idx + items_per_page
-        page_habits = habits[start_idx:end_idx]
-        
-        table = PrettyTable()
-        table.field_names = [
-            'Name', 'Category', 'Description', 'Repeat',
-            'Days Passed', 'Success Rate', 'Current Streak',
-            'Reset Count', 'Status'
-        ]
-        
-        for habit in page_habits:
-            days_passed = self.ui_handler.calculate_passed_days(habit[5])
-            success_rate = self.ui_handler.calculate_success_rate(
-                habit[5], habit[8], habit[11], habit[12]
-            )
-            
-            table.add_row([
-                habit[1], habit[2], habit[3][:30], habit[8],
-                days_passed, success_rate, habit[11],
-                habit[12], habit[7]
-            ])
-        
-        print("\nHabits Analytics Overview (Page {}):".format(page))
-        print(table)
 
     def get_unique_field_values(self, habits: List[tuple], field: str) -> List[str]:
         """Get unique values for field"""

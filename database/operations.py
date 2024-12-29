@@ -1,4 +1,4 @@
-from database.connector import Database
+from database.connector import DatabaseConnector as Database
 from datetime import datetime
 import sqlite3
 from typing import Dict, Any, List, Tuple, Optional

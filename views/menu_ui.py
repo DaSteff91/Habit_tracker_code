@@ -6,11 +6,11 @@ import questionary
 
 class MainUI(BaseUI):
     """Main menu and program flow"""
-    def __init__(self):
+    def __init__(self, habit_controller=None, task_controller=None, analytics_controller=None):
         super().__init__()
-        self.analytics_ui = AnalyticsUI()
-        self.task_ui = TaskUI()
-        self.habit_ui = HabitManagementUI()
+        self.habit_ui = HabitManagementUI(habit_controller)
+        self.task_ui = TaskUI(task_controller)
+        self.analytics_ui = AnalyticsUI(analytics_controller)
 
     def main_menu(self):
         """Main menu navigation"""
@@ -32,7 +32,7 @@ class MainUI(BaseUI):
 
     def get_menu_choice(self):
         """Get main menu selection"""
-        self.clear_screen()  # Add if not present
+        self.clear_screen()
         self.show_navigation_hint() 
         return questionary.select(
             "What would you like to do?",
