@@ -120,7 +120,7 @@ class AnalyticsUI(BaseUI):
                 )
         return data
 
-    def handle_filter_habits(self, data: List[Dict]) -> Optional[List[Dict]]:
+    def handle_filter_habits(self, data: List[Dict]) -> List[Dict]:
         """Handle habit filtering workflow"""
         field = questionary.select(
             "Select field to filter by:",
@@ -139,10 +139,10 @@ class AnalyticsUI(BaseUI):
             ).ask()
             
             if value == "Reset Filter":
-                return self.get_habits_data()
+                return self.analytics_controller.get_analytics_data()
                 
             return self.analytics_controller.filter_data(
-                data, 
+                data,
                 field.lower(),
                 value
             )
@@ -161,15 +161,23 @@ class AnalyticsUI(BaseUI):
         return ["Name", "Category", "Description", "Repeat", "Status"]
 
 
-    def get_unique_field_values(self, habits: List[tuple], field: str) -> List[str]:
+    def get_unique_field_values(self, habits: List[Dict], field: str) -> List[str]:
         """Get unique values for field"""
-        field_indices = {
-            'Name': 1, 'Category': 2, 'Description': 3,
-            'Repeat': 8, 'Status': 7
+        # Map UI fields to dict keys
+        field_mapping = {
+            'Name': 'name',
+            'Category': 'category', 
+            'Description': 'description',
+            'Repeat': 'repeat',
+            'Status': 'status'
         }
         
-        index = field_indices[field]
-        return sorted(set(habit[index] for habit in habits))
+        key = field_mapping.get(field)
+        if not key:
+            return []
+            
+        # Get unique values using dict access
+        return sorted(set(habit[key] for habit in habits))
     
     def process_analytics_action(self, habits: List[tuple], action: str) -> List[tuple]:
         """Process selected analytics action"""
