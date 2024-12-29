@@ -13,7 +13,6 @@ class AnalyticsUI(BaseUI):
         self.items_per_page = 15
 
     def display_paginated_analytics(self, habits: List[Dict], page: int, items_per_page: int) -> None:
-        """Display paginated analytics table"""
         start_idx = (page - 1) * items_per_page
         end_idx = start_idx + items_per_page
         page_habits = habits[start_idx:end_idx]
@@ -26,25 +25,20 @@ class AnalyticsUI(BaseUI):
         ]
         
         for habit in page_habits:
-            days_passed = self.analytics_controller.calculate_passed_days(habit['start'])  # Changed key
-            success_rate = self.analytics_controller.calculate_success_rate(
-                habit['start'],  # Changed key
-                habit['repeat'],
-                habit['current_streak'],
-                habit['reset_count']
-            )
-            
             table.add_row([
                 habit['name'],
                 habit['category'],
                 habit['description'],
                 habit['repeat'],
-                days_passed,
-                success_rate,
+                habit['days_passed'],
+                habit['success_rate'],
                 habit['current_streak'],
                 habit['reset_count'],
                 habit['status']
             ])
+        
+        print("\nAnalytics Overview:")
+        print(table)
 
     def show_analytics_menu(self):
         """Main analytics menu controller"""

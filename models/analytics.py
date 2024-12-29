@@ -41,28 +41,27 @@ class Analytics:
             return "N/A"
 
     def get_analytics_data(self) -> List[Dict]:
+        """Get formatted analytics data"""
+        db = DatabaseController()
         try:
-            habits = self.db_controller.read_data('habit')
+            habits = db.read_data('habit')
             return [{
                 'id': habit[0],
                 'name': habit[1],
                 'category': habit[2],
                 'description': habit[3][:30],
                 'repeat': habit[8],
-                'days_passed': self.calculate_passed_days(habit[5]),  # start date
+                'start': habit[5],  # Keep key as 'start'
+                'days_passed': self.calculate_passed_days(habit[5]),
                 'success_rate': self.calculate_success_rate(
-                    habit[5],  # start date
-                    habit[8],  # repeat
-                    habit[11],  # streak
-                    habit[12]  # reset_count
+                    habit[5], habit[8], habit[11], habit[12]
                 ),
                 'current_streak': habit[11],
                 'reset_count': habit[12],
-                'status': habit[7],
-                'start': habit[5]  # Add this line
+                'status': habit[7]
             } for habit in habits] if habits else []
         except Exception as e:
-            print("Error getting analytics data: {}".format(e))
+            print(f"Error getting analytics data: {e}")
             return []
         
     def sort_analytics_data(self, data: List[Dict], sort_by: str, ascending: bool = True) -> List[Dict]:
