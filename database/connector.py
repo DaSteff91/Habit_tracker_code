@@ -7,7 +7,7 @@ class DatabaseConnector:
         self.db_name = db_name
         self.connection = None
         self.cursor = None
-        self.connect()  # The connection is established when the Database object is created
+        self.connect()  
 
     def connect(self) -> None:
         """Establish database connection"""

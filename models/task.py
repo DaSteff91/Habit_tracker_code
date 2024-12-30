@@ -39,12 +39,18 @@ class Task:
         except Exception as e:
             print("Error saving task: {}".format(e))
             return None
-
+        
     def update_status(self, new_status: str) -> bool:
-        """Update task status with validation"""
-        if not self._is_valid_status(new_status):
+        """Update task status"""
+        try:
+            return self.db_controller.update_data(
+                'task',
+                self.id,
+                {'status': new_status}
+            )
+        except Exception as e:
+            print("Error updating status: {}".format(e))
             return False
-        return self.db_controller.update_data('task', self.id, {'status': new_status})
     
     @property
     def get_streak(self) -> int:
@@ -67,8 +73,8 @@ class Task:
                 'task',
                 {'habit_id': self.habit_id, 'due_date': self.due_date}
             )
-            if not total_tasks:
-                return "0%"
+            if not total_tasks or len(total_tasks) <= 1:  # Check for single task
+                return ""  # Empty string for single tasks
                 
             completed = len([t for t in total_tasks if t[6] == 'done'])
             rate = (completed / len(total_tasks)) * 100
@@ -78,18 +84,6 @@ class Task:
             return "N/A"
 
     # Business logic
-    @staticmethod
-    def _calculate_completion_rate(habit_id: int) -> float:
-        """Calculate completion rate for a habit's tasks"""
-        db = DatabaseController()
-        try:
-            all_tasks = db.read_data('task', {'habit_id': habit_id})
-            if not all_tasks:
-                return 0.0
-            completed = len([t for t in all_tasks if t[6] == 'done'])
-            return round((completed / len(all_tasks) * 100), 1)
-        except Exception:
-            return 0.0
         
     @staticmethod
     def _calculate_next_due_date(self, repeat: str) -> str:
@@ -105,14 +99,20 @@ class Task:
 
     # Class methods for task creation
     @classmethod
-    def get_tasks_for_habit(cls, habit_id: int) -> List['Task']:
-        """Get all tasks for a habit"""
-        db = DatabaseController()
+    def get_tasks_for_habit(cls, habit_id: int, due_date: str) -> List['Task']:
+        """Get all tasks for a habit on specific date"""
         try:
-            tasks = db.read_data('task', {'habit_id': habit_id})
+            db = DatabaseController()
+            tasks = db.read_data(
+                'task',
+                {
+                    'habit_id': habit_id,
+                    'due_date': due_date
+                }
+            )
             return [cls.from_db_tuple(task) for task in tasks]
         except Exception as e:
-            print(f"Error getting tasks: {e}")
+            print("Error getting tasks: {}".format(e))
             return []
 
     @classmethod

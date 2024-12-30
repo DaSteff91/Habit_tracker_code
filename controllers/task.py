@@ -34,32 +34,41 @@ class TaskController:
 
             task = Task.get_by_id(task_id)
             if not task:
+                print("Task {} not found".format(task_id))
                 return False
 
-            if not task.update_status(new_status):
+            success = task.update_status(new_status)
+            if success:
+                print("Updated task {} to {}".format(task_id, new_status))
+                if new_status in ['done', 'ignore']:
+                    return self._handle_next_series(task)
+                return True
+            else:
+                print("Failed to update task {}".format(task_id))
                 return False
 
-            # Handle next task series creation if needed
-            if new_status in ['done', 'ignore']:
-                return self._handle_next_series(task)
-            return True
         except Exception as e:
             print("Error updating task status: {}".format(e))
             return False
 
     def _handle_next_series(self, task: Task) -> bool:
         """Handle creation of next task series"""
-        habit_tasks = Task.get_tasks_for_habit(task.habit_id, task.due_date)
-        all_done, all_handled = Task.check_completion_status(habit_tasks)
-        
-        if all_handled:
-            return Task.create_next_series(
-                task.habit_id,
-                task.due_date,
-                habit_tasks
-            )
-        return True
-    
+        try:
+            habit_tasks = Task.get_tasks_for_habit(task.habit_id, task.due_date)
+            all_done, all_handled = Task.check_completion_status(habit_tasks)
+            
+            if all_handled:
+                return Task.create_next_series(
+                    task.habit_id,
+                    task.due_date,
+                    habit_tasks
+                )
+            return True
+
+        except Exception as e:
+            print("Error handling next series: {}".format(e))
+            return False
+
     def _format_task_data(self, task: Task) -> Dict[str, Any]:
         """Format task data for UI"""
         return {
