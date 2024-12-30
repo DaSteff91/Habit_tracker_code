@@ -4,21 +4,23 @@ from database.operations import DatabaseController
 
 class Task:
     """Task data model with business logic"""
-    
     def __init__(self, 
                  habit_id: int,
                  task_number: int,
                  task_description: str,
                  due_date: str,
+                 task_id: int = None,
                  status: str = 'pending',
+                 created: str = None,
                  db_controller: Optional[DatabaseController] = None):
         # Core properties
+        self.id = task_id
         self.habit_id = habit_id
         self.task_number = task_number
         self.task_description = task_description
         self.due_date = due_date
         self.status = status
-        self.created = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        self.created = created or datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
         # Additional properties
         self.habit_name = None
@@ -43,6 +45,37 @@ class Task:
         if not self._is_valid_status(new_status):
             return False
         return self.db_controller.update_data('task', self.id, {'status': new_status})
+    
+    @property
+    def get_streak(self) -> int:
+        """Get current streak from associated habit"""
+        try:
+            habit = self.db_controller.read_data(
+                'habit', 
+                {'id': self.habit_id}
+            )[0]
+            return habit[11]  # streak field
+        except Exception as e:
+            print("Error getting streak: {}".format(e))
+            return 0
+
+    @property
+    def get_completion_rate(self) -> str:
+        """Calculate completion rate for task's habit"""
+        try:
+            total_tasks = self.db_controller.read_data(
+                'task',
+                {'habit_id': self.habit_id, 'due_date': self.due_date}
+            )
+            if not total_tasks:
+                return "0%"
+                
+            completed = len([t for t in total_tasks if t[6] == 'done'])
+            rate = (completed / len(total_tasks)) * 100
+            return "{}%".format(int(rate))
+        except Exception as e:
+            print("Error calculating completion rate: {}".format(e))
+            return "N/A"
 
     # Business logic
     @staticmethod
@@ -71,7 +104,6 @@ class Task:
         return next_date.strftime('%Y-%m-%d')
 
     # Class methods for task creation
- 
     @classmethod
     def get_tasks_for_habit(cls, habit_id: int) -> List['Task']:
         """Get all tasks for a habit"""
@@ -170,22 +202,19 @@ class Task:
     
     @classmethod
     def get_pending(cls) -> List['Task']:
-        """Get all pending tasks with habit data"""
+        """Get all pending tasks"""
         db = DatabaseController()
         try:
-            # Get raw data
             tasks = db.read_data('task', {'status': 'pending'})
             habits = db.read_data('habit')
             
-            # Create task objects
             pending_tasks = []
             for task in tasks:
                 task_obj = cls.from_db_tuple(task)
                 habit = next((h for h in habits if h[0] == task[1]), None)
-                
-                if habit and habit[7] != 'Paused':  # Check if habit is active
-                    task_obj.set_habit_data(habit[1], habit[11])  # Set habit name and streak
-                    task_obj.completion_rate = task_obj._calculate_completion_rate(task[1])
+                if habit and habit[7] != 'Paused':
+                    task_obj.habit_name = habit[1]  # Set habit name
+                    task_obj.streak = habit[11]     # Set streak
                     pending_tasks.append(task_obj)
                     
             return pending_tasks
@@ -194,19 +223,17 @@ class Task:
             return []
 
     @classmethod
-    def from_db_tuple(cls, db_tuple: tuple,
-                     db_controller: Optional[DatabaseController] = None) -> 'Task':
-        """Create from database record"""
-        task = cls(
+    def from_db_tuple(cls, db_tuple: tuple) -> 'Task':
+        """Create task from database tuple"""
+        return cls(
+            task_id=db_tuple[0],
             habit_id=db_tuple[1],
             task_number=db_tuple[2],
             task_description=db_tuple[3],
+            created=db_tuple[4],
             due_date=db_tuple[5],
-            status=db_tuple[6],
-            db_controller=db_controller
+            status=db_tuple[6]
         )
-        task.created = db_tuple[4]
-        return task
     
     @classmethod
     def create_series(cls, habit_id: int, habit_data: Dict[str, Any]) -> List[int]:

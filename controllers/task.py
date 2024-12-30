@@ -1,6 +1,8 @@
 from typing import Dict, List, Tuple, Any, Optional
+from datetime import datetime
 from models.task import Task
 from utils.validators import TaskValidator
+from controllers.habit import HabitController
 
 class TaskController:
     """Task controller - coordinates model operations"""
@@ -8,21 +10,22 @@ class TaskController:
     def __init__(self):
         """Initialize controller"""
         self.validator = TaskValidator()
+        self.habit_controller = HabitController()
         self.status_map = {
             "Mark tasks as done": "done",
             "Mark tasks as ignored": "ignore",
             "Pause habit": "pause habit"
         }
 
-    def get_pending_tasks(self) -> List[Dict[str, Any]]:
-        """Get formatted pending tasks through model"""
+    def get_pending_tasks(self) -> List[Dict]:
+        """Get formatted pending tasks"""
         try:
-            tasks = Task.get_pending()
+            tasks = Task.get_pending()  # Tasks already filtered for pending
             return [self._format_task_data(task) for task in tasks]
         except Exception as e:
             print("Error getting pending tasks: {}".format(e))
             return []
-
+                
     def update_task_status(self, task_id: int, new_status: str) -> bool:
         """Coordinate task status update"""
         try:
@@ -56,7 +59,7 @@ class TaskController:
                 habit_tasks
             )
         return True
-
+    
     def _format_task_data(self, task: Task) -> Dict[str, Any]:
         """Format task data for UI"""
         return {
@@ -66,6 +69,6 @@ class TaskController:
             'description': task.task_description[:30],
             'due_date': task.due_date,
             'status': task.status,
-            'completion_rate': task.completion_rate,
-            'streak': task.streak
+            'completion_rate': task.get_completion_rate,
+            'streak': task.get_streak
         }
