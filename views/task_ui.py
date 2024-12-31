@@ -127,22 +127,43 @@ class TaskUI(BaseUI):
             success = True
             updated_count = 0
             
+            # For ignored tasks, check related ones
+            if status == "ignore":
+                selected_rows = self._handle_ignore_tasks(selected_rows, task_id_map)
+                
+            # Process updates
             for row in selected_rows:
                 task_id = task_id_map.get(row)
-                if task_id:
-                    if self.task_controller.update_task_status(task_id, status):
-                        updated_count += 1
-                    else:
-                        success = False
+                if task_id and self.task_controller.update_task_status(task_id, status):
+                    updated_count += 1
+                else:
+                    success = False
             
-            # Single summary message
             if updated_count > 0:
-                print("\nSuccessfully updated {} task(s)".format(updated_count))
+                print("\nSuccessfully updated {} task(s)!".format(updated_count))
                 
             return success
         except Exception as e:
             print("Error updating tasks: {}".format(e))
             return False
+        
+    def _handle_ignore_tasks(self, selected_rows: List[int], task_id_map: Dict[int, int]) -> List[int]:
+        """Handle related tasks when ignoring"""
+        for row in selected_rows.copy():
+            task_id = task_id_map.get(row)
+            if task_id:
+                related_tasks = self.task_controller.get_related_tasks(task_id)
+                if related_tasks:
+                    if questionary.confirm(
+                        "\nThere are other tasks for this habit on this date. Ignore them as well?",
+                        default=False,
+                        style=self.style
+                    ).ask():
+                        # Add related task rows
+                        for k,v in task_id_map.items():
+                            if v in [t.id for t in related_tasks] and k not in selected_rows:
+                                selected_rows.append(k)
+        return selected_rows  
 
     def display_task_table(self, headers: List[str], tasks: List[Dict]) -> None:
         """Display formatted task table"""

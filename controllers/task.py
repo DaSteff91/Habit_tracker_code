@@ -26,6 +26,17 @@ class TaskController:
         except Exception as e:
             print("Error getting pending tasks: {}".format(e))
             return []
+    
+    def get_related_tasks(self, task_id: int) -> List[int]:
+        """Get tasks with same habit/date"""
+        try:
+            task = Task.get_by_id(task_id)
+            if task:
+                return Task.get_tasks_for_habit(task.habit_id, task.due_date)
+            return []
+        except Exception as e:
+            print("Error getting related tasks: {}".format(e))
+            return []
                 
     def update_task_status(self, task_id: int, new_status: str) -> bool:
         """Coordinate task status update"""
@@ -38,6 +49,7 @@ class TaskController:
                 return False
 
             success = task.update_status(new_status)
+
             if success:
                 if new_status in ['done', 'ignore']:
                     return self._handle_next_series(task)
@@ -55,18 +67,17 @@ class TaskController:
             habit_tasks = Task.get_tasks_for_habit(task.habit_id, task.due_date)
             all_done, all_handled = Task.check_completion_status(habit_tasks)
             
+            # Handle streak updates
             if all_done:
-                # Use habit model directly
                 habit = Habit.get_by_id(task.habit_id)
                 if habit:
                     habit.increment_streak()
-            elif all_handled and not all_done:
-                # Use habit model directly
+            elif all_handled:  # Not all done but all handled
                 habit = Habit.get_by_id(task.habit_id)
                 if habit:
                     habit.reset_streak()
-                    habit.increment_reset_counter()
-                
+                    
+            # Create next series if ALL tasks are handled (done OR ignored)
             if all_handled:
                 return Task.create_next_series(task.habit_id, task.due_date, habit_tasks)
             return True
@@ -74,7 +85,7 @@ class TaskController:
         except Exception as e:
             print("Error handling next series: {}".format(e))
             return False
-
+        
     def _format_task_data(self, task: Task) -> Dict[str, Any]:
         """Format task data for UI"""
         return {
