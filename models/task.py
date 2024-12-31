@@ -86,9 +86,8 @@ class Task:
     # Business logic
         
     @staticmethod
-    def _calculate_next_due_date(self, repeat: str) -> str:
+    def _calculate_next_due_date(current: datetime, repeat: str) -> str:
         """Calculate next due date based on repeat interval"""
-        current = datetime.strptime(self.due_date, '%Y-%m-%d')
         if repeat == 'Daily':
             next_date = current + timedelta(days=1)
         elif repeat == 'Weekly':
@@ -97,9 +96,8 @@ class Task:
             next_date = current
         return next_date.strftime('%Y-%m-%d')
 
-    # Class methods for task creation
-    @classmethod
-    def get_tasks_for_habit(cls, habit_id: int, due_date: str) -> List['Task']:
+    @staticmethod
+    def get_tasks_for_habit(habit_id: int, due_date: str) -> List['Task']:
         """Get all tasks for a habit on specific date"""
         try:
             db = DatabaseController()
@@ -110,10 +108,12 @@ class Task:
                     'due_date': due_date
                 }
             )
-            return [cls.from_db_tuple(task) for task in tasks]
+            return [Task.from_db_tuple(task) for task in tasks]
         except Exception as e:
             print("Error getting tasks: {}".format(e))
             return []
+
+    # Class methods for task creation
 
     @classmethod
     def delete_for_habit(cls, habit_id: int) -> bool:
@@ -126,26 +126,20 @@ class Task:
             return False
 
     @classmethod
-    def create_next_series(cls, habit_id: int, due_date: str, tasks: List[Dict[str, Any]]) -> bool:
+    def create_next_series(cls, habit_id: int, due_date: str, tasks: List['Task']) -> bool:
         """Create next series of tasks based on completed ones"""
-        db = DatabaseController()
         try:
-            # Get habit data for repeat interval
-            habit = db.read_data('habit', {'id': habit_id})[0]
-            repeat = habit[8]  # repeat interval
-            stop_date = datetime.strptime(habit[6], '%Y-%m-%d')  # end date
-
-            # Calculate next due date
-            current = datetime.strptime(due_date, '%Y-%m-%d')
-            next_due = cls._calculate_next_due_date(current, repeat)
-
-            # Check if we've reached the end date
-            if next_due.date() > stop_date.date():
-                print("Habit completed - end date reached")
+            db = DatabaseController()
+            habits = db.read_data('habit', {'id': habit_id})
+            if not habits:
                 return False
-
-            # Create new tasks
-            for task_num in range(1, len(tasks) + 1):
+                
+            habit = habits[0]
+            # Use last due date as base
+            current = datetime.strptime(due_date, '%Y-%m-%d')
+            next_due = current + timedelta(days=1 if habit[8]=='Daily' else 7)  # habit[8] is repeat
+            
+            for task_num in range(1, habit[9] + 1):  # habit[9] is tasks_count
                 task = cls(
                     habit_id=habit_id,
                     task_number=task_num,
@@ -153,7 +147,7 @@ class Task:
                     due_date=next_due.strftime('%Y-%m-%d')
                 )
                 task.save()
-
+                
             return True
         except Exception as e:
             print("Error creating next task series: {}".format(e))
@@ -205,18 +199,21 @@ class Task:
         """Get all pending tasks"""
         db = DatabaseController()
         try:
+            today = datetime.now().strftime('%Y-%m-%d')
             tasks = db.read_data('task', {'status': 'pending'})
             habits = db.read_data('habit')
             
             pending_tasks = []
             for task in tasks:
                 task_obj = cls.from_db_tuple(task)
-                habit = next((h for h in habits if h[0] == task[1]), None)
-                if habit and habit[7] != 'Paused':
-                    task_obj.habit_name = habit[1]  # Set habit name
-                    task_obj.streak = habit[11]     # Set streak
-                    pending_tasks.append(task_obj)
-                    
+                # Add date check: due today or earlier
+                if task_obj.due_date <= today:
+                    habit = next((h for h in habits if h[0] == task[1]), None)
+                    if habit and habit[7] != 'Paused':
+                        task_obj.habit_name = habit[1]
+                        task_obj.streak = habit[11]
+                        pending_tasks.append(task_obj)
+                        
             return pending_tasks
         except Exception as e:
             print("Error getting pending tasks: {}".format(e))
@@ -238,7 +235,6 @@ class Task:
     @classmethod
     def create_series(cls, habit_id: int, habit_data: Dict[str, Any]) -> List[int]:
         """Create a series of tasks for a habit"""
-        db = DatabaseController()
         task_ids = []
         
         try:

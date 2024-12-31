@@ -169,6 +169,18 @@ class Habit:
         except Exception as e:
             print(f"Error incrementing streak: {e}")
             return False
+        
+    def reset_streak(self, habit_id: int) -> bool:
+        """Reset habit streak and increment reset counter"""
+        try:
+            habit = self.get_habit(habit_id)
+            if habit:
+                if habit.update({'streak': 0}):
+                    return habit.increment_reset_counter()
+            return False
+        except Exception as e:
+            print("Error resetting streak: {}".format(e))
+            return False
 
     def increment_reset_counter(self) -> bool:
         """Increment reset counter"""

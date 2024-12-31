@@ -120,21 +120,25 @@ class TaskUI(BaseUI):
             print("\nNo tasks selected")
         return selected
 
-    def process_task_update(self, selected_rows: List[int], 
-                        task_id_map: Dict[int, int], 
-                        action: str) -> bool:
+    def process_task_update(self, selected_rows: List[int], task_id_map: Dict[int, int], action: str) -> bool:
         """Process task updates"""
         try:
             status = self.task_controller.status_map[action]
             success = True
+            updated_count = 0
             
             for row in selected_rows:
                 task_id = task_id_map.get(row)
                 if task_id:
-                    if not self.task_controller.update_task_status(task_id, status):
+                    if self.task_controller.update_task_status(task_id, status):
+                        updated_count += 1
+                    else:
                         success = False
-                        print("Failed to update task at row {}".format(row))
-                        
+            
+            # Single summary message
+            if updated_count > 0:
+                print("\nSuccessfully updated {} task(s)".format(updated_count))
+                
             return success
         except Exception as e:
             print("Error updating tasks: {}".format(e))

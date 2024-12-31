@@ -14,10 +14,7 @@ class DatabaseController:
         """Insert data into database with table-specific duplicate checks"""
         try:
             with Database(self.db_name) as db:
-                print("1. Creating tables...")
                 db.create_tables()
-                
-                print("2. Checking for existing {} data...".format(table))
                 
                 # Table-specific duplicate checks
                 if table == 'habit':
@@ -45,17 +42,13 @@ class DatabaseController:
                     print("Invalid table: {}".format(table))
                     return -1
                     
-                print("Checking conditions:", conditions)
                 existing_entries = db.read_data(table, conditions)
                 
                 if existing_entries:
                     print("Error: {} already exists!".format(table.capitalize()))
                     return -1
                     
-                print("3. Inserting new {}...".format(table))
                 record_id = db.create_data(table, data)
-                if record_id != -1:
-                    print("Success! {} created with ID: {}".format(table.capitalize(), record_id))
                 return record_id
                 
         except sqlite3.Error as e:
@@ -72,11 +65,6 @@ class DatabaseController:
                 if table == 'habit':
                     db.delete_data('task', {'habit_id': record_id})
                 result = db.delete_data(table, {'id': record_id})
-                print("{} {} {}".format(
-                    "Successfully" if result else "Failed to",
-                    "deleted",
-                    table
-                ))
                 return result
         except Exception as e:
             print("Error deleting data: {}".format(e))
@@ -91,11 +79,6 @@ class DatabaseController:
                     return False
                     
                 result = db.update_data(table, new_data, {'id': record_id})
-                print("{} {} {}".format(
-                    "Successfully" if result else "Failed to",
-                    "updated",
-                    table
-                ))
                 return result
         except Exception as e:
             print("Error updating data: {}".format(e))
@@ -138,48 +121,8 @@ class DatabaseController:
         try:
             with Database(self.db_name) as db:
                 if table not in ['habit', 'task']:
-                    print("Invalid table name. Use 'habit' or 'task'")
                     return []
                 return db.get_table_header(table)
         except Exception as e:
             print("Error getting table headers: {}".format(e))
             return []
-
-def main():
-    """Test database operations"""
-    controller = DatabaseController()
-    
-    # Test data
-    test_habit = {
-        'name': 'Exercise',
-        'category': 'Health',
-        'description': 'Daily workout',
-        'created': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'start': '2024-03-01',
-        'stop': '2024-12-31',
-        'importance': 'High',
-        'repeat': 'Daily',
-        'tasks': 1,
-        'tasks_description': 'Workout routine',
-        'streak': 0
-    }
-    
-    test_task = {
-        'habit_id': 1,
-        'task_number': 1,
-        'task_description': 'Morning exercise',
-        'created': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'due_date': '2024-03-15',
-        'status': 'pending'
-    }
-
-    # Test operations: Uncomment the ones you want to test
-    # controller.create_data('habit', test_habit)
-    # controller.create_data('task', test_task)
-    controller.read_data('habit', {"streak": 0})
-    # controller.read_data('task')
-    # controller.update_data('task', 3, {'habit_id': '1'})
-    # controller.delete_data('habit', 6)
-
-if __name__ == "__main__":
-    main()
