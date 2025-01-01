@@ -1,0 +1,78 @@
+NAVIGATION
+----------
+- Use arrow keys (↑↓) to move the curser
+- Enter/Return to select an item OR to go back (where the Space is used for multi select)
+- Space to check/uncheck items (in multi selections)
+
+MAIN MENU
+------------
+- Task Overview: Update task status for tracking
+- Habit Management: Create, modify and delete habits
+- Analytics: View and analyze habit statistics with filter and sorting functionality
+- Help: Display this help documentation
+- Exit: Close the application
+
+TASK OVERVIEW
+---------------
+- View all pending tasks with a due date equal today or earlier
+- Mark tasks as done/ignored - multi selection possible
+- Pause habits temporarily
+- Retrospective task handling is possible
+- Related tasks can be handled automatically in case you want to ignore them or pause the habit
+
+HABIT MANAGEMENT
+------------------
+- Create new habits with:
+  * Name and category
+  * Description
+  * Start/End dates
+  * Importance (High/Low)
+  * Repeat interval (Daily/Weekly)
+  * Number of tasks (1-10)
+  * Task description
+- The given number of tasks will be created right after the habit creation
+- Each task has the same description
+- Update existing habits - only one habit and one item are editable at the same time
+- Unpausing of a habit is possible via Update 
+- Delete habits - multiple selection possible. Associated tasks will be deleted. No archive
+
+
+ANALYTICS
+-----------
+- View success rates and streaks for all habits
+- Filter habits by category, status, etc.
+- Sort by different criteria (name, streak, etc.)
+
+
+EXAMPLE
+-----------
+- Main Menu -> Habit Management
+- You creat a new habit for tracking:
+  * Name: Drink water
+  * Category: Health
+  * Description: Drink 2 liters per day, evenly distributed over the day
+  * Start/End dates: 2024-12-01 / 2025-12-01
+  * Importance: High
+  * Repeat interval: Daily
+  * Number of tasks (1-10): 10
+  * Task description: Drink 0,2l
+- 10 individual tasks for tracking are created and available at the 1st of december for tracking
+- The day of tracking arrives: 
+    - Open "Task Overview"
+    - Select the respective task(-s) you want to modify
+    - Decide: "Do I want to lie to myself?"
+    - Continue as you decide as long as either you mark all tasks as done or ignored
+- On the next day 10 new tasks await you to be conquered
+- After 6 months you decide to do a review
+    - Open the "Analytic" menu
+    - Filter for Name = Drink enough
+    - Check your success rate and your retry counter - happy?
+    - Lets compare to other habits!
+    - Reset the view and filter for the longest streak - what is in your top 3?
+- After 7 months you feel so comfortable that you decide to only need 1 task for the tracking
+    - Update Habit
+      * Number of tasks: 1
+      * Task description: Did I drink enough today?
+- After 9 month you decide its routine -> Time to delele the Drink enough habit
+    - Habit management
+    - Delet habit -> Lets make room for something new

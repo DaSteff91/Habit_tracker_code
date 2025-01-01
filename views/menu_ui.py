@@ -21,15 +21,6 @@ class MainUI(BaseUI):
                     break
             self.handle_menu_choice(choice)
 
-    def handle_menu_choice(self, choice):
-        """Route menu selections to appropriate UI"""
-        if choice == "Analytics":
-            self.analytics_ui.show_analytics_menu()
-        elif choice == "Task Overview":
-            self.task_ui.show_task_overview()
-        elif choice == "Habit Management":
-            self.habit_ui.show_habit_management()
-
     def get_menu_choice(self):
         """Get main menu selection"""
         self.clear_screen()
@@ -46,6 +37,34 @@ class MainUI(BaseUI):
             style=self.style
         ).ask()
 
+    def handle_menu_choice(self, choice):
+        """Route menu selections to appropriate UI"""
+        if choice == "Analytics":
+            self.analytics_ui.show_analytics_menu()
+        elif choice == "Task Overview":
+            self.task_ui.show_task_overview()
+        elif choice == "Habit Management":
+            self.habit_ui.show_habit_management()
+        elif choice == "Help":
+            self.show_help()
+
+    def show_help(self):
+        """Display help information"""
+        self.clear_screen()
+        self.show_navigation_hint()
+        
+        try:
+            with open('utils/help.txt', 'r') as help_file:
+                help_text = help_file.read()
+                print("\nHelp Documentation:")
+                print("=================")
+                print(help_text)
+        except Exception as e:
+            print("\nError loading help documentation: {}".format(e))
+        
+        input("\nPress Enter to return to main menu...")
+        self.clear_screen()
+
     def confirm_exit(self):
         """Confirm program exit"""
         confirmed = questionary.confirm(
@@ -59,8 +78,3 @@ class MainUI(BaseUI):
             print("Thank you for using the Habit Tracker!")
         return confirmed
 
-    def show_help(self):
-        """Display help information"""
-        self.clear_screen()
-        self.show_navigation_hint()
-        print("\nHelp documentation coming soon!")
