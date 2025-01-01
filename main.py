@@ -9,6 +9,7 @@ def main():
     """Main entry point of the application"""
     # Initialize database system
     DatabaseConnector()
+    DatabaseController()
     
     # Initialize controllers (no db dependencies)
     habit_controller = HabitController()
@@ -21,3 +22,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
