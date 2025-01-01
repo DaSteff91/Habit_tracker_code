@@ -123,13 +123,19 @@ class Task:
             if not habit:
                 return False
                 
-            next_due = get_next_date(due_date, habit[8])  # habit[8] is repeat
-            
-            if cls._is_past_end_date(next_due, habit[6]):  # habit[6] is stop_date
-                print(f"Habit {habit_id} completed - end date reached")
+            next_due = get_next_date(due_date, habit[8])  # Returns str
+            if not next_due:
                 return False
                 
-            return cls._create_task_series(habit_id, next_due, habit)
+            # Convert string to datetime for comparison
+            next_due_dt = datetime.strptime(next_due, '%Y-%m-%d')
+            
+            if cls._is_past_end_date(next_due_dt, habit[6]):  # habit[6] is stop_date
+                print("Habit {} completed - end date reached".format(habit_id))
+                return False
+                
+            return cls._create_task_series(habit_id, next_due_dt, habit)
+                
         except Exception as e:
             print("Error creating next task series: {}".format(e))
             return False
