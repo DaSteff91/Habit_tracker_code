@@ -1,6 +1,7 @@
 from typing import Dict, List, Tuple, Any, Optional
 from datetime import datetime, timedelta
 from database.operations import DatabaseController
+from utils.date_utils import get_next_date
 
 class Task:
     """Task data model with business logic"""
@@ -84,17 +85,6 @@ class Task:
             return "N/A"
 
     # Business logic
-        
-    @staticmethod
-    def _calculate_next_due_date(current: datetime, repeat: str) -> str:
-        """Calculate next due date based on repeat interval"""
-        if repeat == 'Daily':
-            next_date = current + timedelta(days=1)
-        elif repeat == 'Weekly':
-            next_date = current + timedelta(weeks=1)
-        else:
-            next_date = current
-        return next_date.strftime('%Y-%m-%d')
 
     @staticmethod
     def get_tasks_for_habit(habit_id: int, due_date: str) -> List['Task']:
@@ -129,16 +119,38 @@ class Task:
     def create_next_series(cls, habit_id: int, due_date: str, tasks: List['Task']) -> bool:
         """Create next series of tasks based on completed ones"""
         try:
-            db = DatabaseController()
-            habits = db.read_data('habit', {'id': habit_id})
-            if not habits:
+            habit = cls._get_habit_data(habit_id)
+            if not habit:
                 return False
                 
-            habit = habits[0]
-            # Use last due date as base
-            current = datetime.strptime(due_date, '%Y-%m-%d')
-            next_due = current + timedelta(days=1 if habit[8]=='Daily' else 7)  # habit[8] is repeat
+            next_due = get_next_date(due_date, habit[8])  # habit[8] is repeat
             
+            if cls._is_past_end_date(next_due, habit[6]):  # habit[6] is stop_date
+                print(f"Habit {habit_id} completed - end date reached")
+                return False
+                
+            return cls._create_task_series(habit_id, next_due, habit)
+        except Exception as e:
+            print("Error creating next task series: {}".format(e))
+            return False
+
+    @classmethod
+    def _get_habit_data(cls, habit_id: int) -> Optional[tuple]:
+        """Get habit data from database"""
+        db = DatabaseController()
+        habits = db.read_data('habit', {'id': habit_id})
+        return habits[0] if habits else None
+
+    @classmethod
+    def _is_past_end_date(cls, next_due: datetime, end_date: str) -> bool:
+        """Check if next due date is past habit end date"""
+        end = datetime.strptime(end_date, '%Y-%m-%d')
+        return next_due.date() > end.date()
+
+    @classmethod
+    def _create_task_series(cls, habit_id: int, next_due: datetime, habit: tuple) -> bool:
+        """Create new series of tasks"""
+        try:
             for task_num in range(1, habit[9] + 1):  # habit[9] is tasks_count
                 task = cls(
                     habit_id=habit_id,
@@ -146,13 +158,13 @@ class Task:
                     task_description=habit[10],  # tasks_description
                     due_date=next_due.strftime('%Y-%m-%d')
                 )
-                task.save()
-                
+                if not task.save():
+                    return False
             return True
         except Exception as e:
-            print("Error creating next task series: {}".format(e))
+            print("Error creating tasks: {}".format(e))
             return False
- 
+
     @classmethod
     def get_by_id(cls, task_id: int) -> Optional['Task']:
         """Get task by ID"""
