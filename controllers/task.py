@@ -18,6 +18,23 @@ class TaskController:
             "Pause habit": "pause habit"
         }
 
+    def get_related_pending_tasks(self, task_id: int, task_id_map: Dict[int, int]) -> List[int]:
+        """Get pending tasks for same habit/date"""
+        try:
+            task = Task.get_by_id(task_id)
+            if task:
+                related_tasks = Task.get_tasks_for_habit(task.habit_id, task.due_date)
+                # Filter for pending AND different task ID
+                pending_tasks = [t for t in related_tasks 
+                               if t.status == 'pending' and t.id != task_id]
+                if pending_tasks:
+                    return [k for k,v in task_id_map.items() 
+                           if v in [t.id for t in pending_tasks]]
+            return []
+        except Exception as e:
+            print("Error getting related tasks: {}".format(e))
+            return []
+
     def get_pending_tasks(self) -> List[Dict]:
         """Get formatted pending tasks"""
         try:
@@ -37,7 +54,7 @@ class TaskController:
         except Exception as e:
             print("Error getting related tasks: {}".format(e))
             return []
-                
+                    
     def update_task_status(self, task_id: int, new_status: str) -> bool:
         """Coordinate task status update"""
         try:

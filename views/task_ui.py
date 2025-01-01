@@ -124,14 +124,22 @@ class TaskUI(BaseUI):
         """Process task updates"""
         try:
             status = self.task_controller.status_map[action]
+            
+            # Add confirmation prompt
+            if not questionary.confirm(
+                "\nUpdate {} task(s) to '{}'?".format(len(selected_rows), status),
+                default=False,
+                style=self.style
+            ).ask():
+                return False
+                
             success = True
             updated_count = 0
             
-            # For ignored tasks, check related ones
-            if status == "ignore":
-                selected_rows = self._handle_ignore_tasks(selected_rows, task_id_map)
+            # Handle both ignore and pause
+            if status in ["ignore", "pause habit"]:
+                selected_rows = self._handle_related_tasks(selected_rows, task_id_map, status)
                 
-            # Process updates
             for row in selected_rows:
                 task_id = task_id_map.get(row)
                 if task_id and self.task_controller.update_task_status(task_id, status):
@@ -147,23 +155,26 @@ class TaskUI(BaseUI):
             print("Error updating tasks: {}".format(e))
             return False
         
-    def _handle_ignore_tasks(self, selected_rows: List[int], task_id_map: Dict[int, int]) -> List[int]:
-        """Handle related tasks when ignoring"""
-        for row in selected_rows.copy():
-            task_id = task_id_map.get(row)
-            if task_id:
-                related_tasks = self.task_controller.get_related_tasks(task_id)
-                if related_tasks:
-                    if questionary.confirm(
-                        "\nThere are other tasks for this habit on this date. Ignore them as well?",
-                        default=False,
-                        style=self.style
-                    ).ask():
-                        # Add related task rows
-                        for k,v in task_id_map.items():
-                            if v in [t.id for t in related_tasks] and k not in selected_rows:
-                                selected_rows.append(k)
-        return selected_rows  
+    def _handle_related_tasks(self, selected_rows: List[int], task_id_map: Dict[int, int], status: str) -> List[int]:
+        """Handle related tasks for both ignore and pause"""
+        try:
+            new_rows = selected_rows.copy()
+            for row in selected_rows:
+                task_id = task_id_map.get(row)
+                if task_id:
+                    related_rows = self.task_controller.get_related_pending_tasks(task_id, task_id_map)
+                    if related_rows:
+                        action_text = "ignore" if status == "ignore" else "pause"
+                        if questionary.confirm(
+                            "\nFound other pending tasks for this habit. {} them as well?".format(action_text),
+                            default=False,
+                            style=self.style
+                        ).ask():
+                            new_rows.extend([r for r in related_rows if r not in new_rows])
+            return new_rows
+        except Exception as e:
+            print("Error handling related tasks: {}".format(e))
+            return selected_rows
 
     def display_task_table(self, headers: List[str], tasks: List[Dict]) -> None:
         """Display formatted task table"""
