@@ -23,49 +23,63 @@ class TaskUI(BaseUI):
             'Streak'
         ]
 
-    def show_task_overview(self):
-        """Main task overview coordinator"""
-        while True:          
-            self.show_navigation_hint()
+    def show_task_overview(self) -> None:
+        """Main task overview controller"""
+        page = 1  # Initialize page counter
+        tasks = self.task_controller.get_pending_tasks()
+        
+        while True:
+            self._display_current_page(tasks, page)
+            total_pages = self._calculate_total_pages(tasks)
+            action = self._get_page_action(tasks, total_pages, page)
             
-            task_data = self.get_task_data()
-            if not task_data:
-                print("\nNo pending tasks found")
-                if questionary.confirm(
-                    "Return to main menu?",
-                    default=True,
-                    style=self.style
-                ).ask():
-                    break
-                continue
-                
-            pending_tasks, task_id_map = task_data
-            # Display table once
-            self.display_task_table(
-                self.get_table_headers(),
-                pending_tasks
-            )
-            
-            # Show menu once per loop
-            if not self.handle_task_actions(pending_tasks, task_id_map):
+            # Update page variable based on action
+            page = self._handle_page_action(action, tasks, page, total_pages)
+            if page is None:  # Use None as exit signal
                 break
 
-    def handle_task_actions(self, pending_tasks: List[Dict], task_id_map: Dict[int, int]) -> bool:
-        """Handle task action selection and processing"""
-        action = self.show_task_menu()
-        if action == "Back to main menu":
-            return False
+    def _display_current_page(self, tasks: List[Dict], page: int) -> None:
+        """Display current page of tasks"""
+        self.display_task_table(self.get_table_headers(), tasks, page)
 
-        # Get task selection
-        selected_rows = self.get_selected_tasks(pending_tasks)
-        if not selected_rows:
-            return True  # Stay in menu if no selection
-            
-        # Process update
-        if self.process_task_update(selected_rows, task_id_map, action):
-            return self.handle_continue_prompt()
-            
-        return True  # Stay in menu by default
+    def _calculate_total_pages(self, tasks: List[Dict]) -> int:
+        """Calculate total number of pages"""
+        return (len(tasks) + self.items_per_page - 1) // self.items_per_page
+
+    def _get_page_action(self, tasks: List[Dict], total_pages: int, page: int) -> str:
+        """Get user action for current page"""
+        choices = self._build_page_choices(page, total_pages)  # Pass both arguments
+        return questionary.select(
+            f"\nPage {page}/{total_pages}" if tasks else "\nChoose action:",
+            choices=choices,
+            style=self.style
+        ).ask()
+
+    def _build_page_choices(self, page: int, total_pages: int) -> List[str]:
+        """Build choices list including pagination"""
+        choices = ["Mark tasks as done", "Mark tasks as ignored", "Pause habit"]
+        if page > 1:
+            choices.append("Previous Page")
+        if page < total_pages:
+            choices.append("Next Page")
+        choices.append("Back to Main Menu")
+        return choices
+    
+    def _handle_page_action(self, action: str, tasks: List[Dict], page: int, total_pages: int) -> Optional[int]:
+        """Handle page action selection and return new page number"""
+        if action == "Back to Main Menu":
+            return None
+        elif action == "Next Page":
+            return min(page + 1, total_pages)
+        elif action == "Previous Page":
+            return max(page - 1, 1)
+        else:
+            selected_rows = self.get_selected_tasks(tasks)  # Direct call
+            if selected_rows:
+                task_id_map = {task['row']: task['id'] for task in tasks}
+                if self.process_task_update(selected_rows, task_id_map, action):
+                    tasks = self.task_controller.get_pending_tasks()
+            return page
 
     def get_task_data(self) -> Optional[Tuple[List[Dict], Dict]]:
         try:
@@ -176,18 +190,22 @@ class TaskUI(BaseUI):
             print("Error handling related tasks: {}".format(e))
             return selected_rows
 
-    def display_task_table(self, headers: List[str], tasks: List[Dict]) -> None:
-        """Display formatted task table"""
+    def display_task_table(self, headers: List[str], tasks: List[Dict], page: int) -> None:
+        """Display paginated task table"""
         if not tasks:
             print("\nNo pending tasks found")
             return
             
+        start_idx = (page - 1) * self.items_per_page
+        end_idx = start_idx + self.items_per_page
+        page_tasks = tasks[start_idx:end_idx]
+        
         table = PrettyTable()
         table.field_names = headers
         
-        for i, task in enumerate(tasks, 1):
+        for task in page_tasks:
             table.add_row([
-                i,  # Row number
+                task['row'],
                 task['habit_name'],
                 task['task_number'],
                 task['description'],
@@ -197,7 +215,7 @@ class TaskUI(BaseUI):
                 task['streak']
             ])
             
-        print("\nPending Tasks:")
+        print("\nTask Overview:")
         print(table)
 
     def handle_continue_prompt(self) -> bool:

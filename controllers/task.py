@@ -38,8 +38,13 @@ class TaskController:
     def get_pending_tasks(self) -> List[Dict]:
         """Get formatted pending tasks"""
         try:
-            tasks = Task.get_pending()  # Tasks already filtered for pending
-            return [self._format_task_data(task) for task in tasks]
+            tasks = Task.get_pending()
+            formatted_tasks = []
+            for idx, task in enumerate(tasks, 1):
+                task_data = self._format_task_data(task)
+                task_data['row'] = idx
+                formatted_tasks.append(task_data)
+            return formatted_tasks
         except Exception as e:
             print("Error getting pending tasks: {}".format(e))
             return []
@@ -106,6 +111,7 @@ class TaskController:
     def _format_task_data(self, task: Task) -> Dict[str, Any]:
         """Format task data for UI"""
         return {
+            'row': 0,
             'id': task.id,
             'habit_name': task.habit_name,
             'task_number': task.task_number,
