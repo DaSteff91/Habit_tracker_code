@@ -1,21 +1,50 @@
 from typing import Dict, List, Tuple, Any, Optional
 from models.habit import Habit
 from utils.validators import HabitValidator
+from models.task import Task
 
 class HabitController:
     def __init__(self):
         self.validator = HabitValidator()
 
     def create_habit(self, habit_data: Dict[str, Any]) -> Optional[int]:
-        """Create habit with validation"""
+        """Create habit with validation and task creation"""
         try:
             if not self.validator.validate_habit_data(habit_data):
                 return None
+                
+            # Create habit    
             habit = Habit.create(habit_data)
-            return habit.id if habit else None
+            if not habit:
+                return None
+                
+            # Create associated tasks
+            success = self.create_initial_tasks(habit.id, habit_data)
+            if not success:
+                # Rollback habit creation
+                habit.delete()
+                return None
+                
+            return habit.id
         except Exception as e:
             print(f"Error creating habit: {e}")
             return None
+
+    def create_initial_tasks(self, habit_id: int, habit_data: Dict[str, Any]) -> bool:
+        """Create initial set of tasks for new habit"""
+        try:
+            for task_num in range(1, habit_data['tasks'] + 1):
+                task = Task.create_from_habit(
+                    habit_id=habit_id,
+                    task_number=task_num,
+                    habit_data=habit_data
+                )
+                if not task:
+                    return False
+            return True
+        except Exception as e:
+            print(f"Error creating tasks: {e}")
+            return False
 
     def update_habit(self, habit_id: int, field: str, value: str) -> bool:
         """Update habit with validation"""

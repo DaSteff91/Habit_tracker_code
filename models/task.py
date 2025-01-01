@@ -167,18 +167,24 @@ class Task:
             return None
  
     @classmethod
-    def create_from_habit(cls, habit_id: int, task_number: int, 
-                         habit_data: Dict[str, Any],
-                         db_controller: Optional[DatabaseController] = None) -> 'Task':
+    def create_from_habit(cls, habit_id: int, task_number: int, habit_data: Dict[str, Any]) -> Optional['Task']:
         """Create task from habit data"""
-        return cls(
-            habit_id=habit_id,
-            task_number=task_number,
-            task_description=habit_data['tasks_description'],
-            due_date=habit_data['start'],
-            db_controller=db_controller
-        )
-
+        try:
+            task = cls(
+                habit_id=habit_id,
+                task_number=task_number,
+                task_description=habit_data['tasks_description'],
+                due_date=habit_data['start']
+            )
+            task_id = task.save()
+            if task_id:
+                task.id = task_id
+                return task
+            return None
+        except Exception as e:
+            print(f"Error creating task from habit: {e}")
+            return None
+        
     @classmethod
     def create_pending_tasks(cls, tasks_data: List[tuple], 
                            habits_data: List[tuple],

@@ -33,6 +33,18 @@ class Habit:
         self.db_controller = db_controller or DatabaseController()
 
     # Class methods for creation/retrieval
+
+    @staticmethod
+    def _prepare_data(data: Dict[str, Any]) -> Dict[str, Any]:
+        """Prepare habit data for database"""
+        prepared = data.copy()
+        prepared.update({
+            'created': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'streak': 0,
+            'streak_reset_count': 0
+        })
+        return prepared
+
     @classmethod
     def create(cls, data: Dict[str, Any]) -> Optional['Habit']:
         """Create new habit"""
