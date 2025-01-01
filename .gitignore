@@ -1,0 +1,23 @@
+# Python
+*__pycache__*
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+
+
+# Project specific
+Backup_*/
+*.db
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS specific
+.DS_Store
+.env
