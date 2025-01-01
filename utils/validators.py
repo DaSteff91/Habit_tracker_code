@@ -1,9 +1,28 @@
 from datetime import datetime
 from typing import Dict, Any, Tuple, Optional
+from models.habit import Habit
 
 class HabitValidator:
     """Validates habit-related data"""
-    
+
+    @staticmethod
+    def validate_update(field: str, value: str, habit_id: int) -> bool: 
+        """Validate single field update"""
+        try:
+            habit = Habit.get_by_id(habit_id)
+            if not habit:
+                return False
+                
+            data = habit.to_dict()
+            data[field.lower()] = value
+            
+            is_valid, message = HabitValidator.validate_habit_data(data, updating_field=field.lower())
+            return is_valid
+                
+        except Exception as e:
+            print("Error validating update: {}".format(e))
+            return False
+
     @staticmethod
     def validate_habit_data(data: Dict[str, Any], updating_field: Optional[str] = None) -> Tuple[bool, str]:
         """Validate habit input data"""

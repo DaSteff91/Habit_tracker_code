@@ -21,11 +21,16 @@ class HabitController:
         """Update habit with validation"""
         try:
             habit = Habit.get_by_id(habit_id)
-            if not habit or not self.validator.validate_update(field, value):
+            if not habit:
                 return False
+                
+            field = field.lower().replace(' ', '_')
+            if not self.validator.validate_update(field, value, habit_id):
+                return False
+                
             return habit.update({field: value})
         except Exception as e:
-            print(f"Error updating habit: {e}")
+            print("Error updating habit: {}".format(e))
             return False
 
     def delete_habit(self, habit_id: int) -> bool:

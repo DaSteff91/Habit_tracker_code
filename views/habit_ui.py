@@ -286,26 +286,45 @@ class HabitManagementUI(BaseUI):
         field = questionary.select(
             "Select field to update:",
             choices=[
-                "Category",
-                "Description", 
-                "Start Date",
-                "End Date",
-                "Importance",
-                "Repeat",
+                "Category (e.g. Health/Fitness)",
+                "Description (e.g. 15 minutes morning routine)",
+                "Start Date (Format: YYYY-MM-DD)",
+                "End Date (Format: YYYY-MM-DD)",
+                "Importance (High/Low)",
+                "Repeat (Daily/Weekly)",
                 "Cancel"
             ],
             style=self.style
         ).ask()
-        
+    
         if field == "Cancel":
             return None, None
             
+        # Extract actual field name without example
+        field = field.split(" (")[0]
+        
+        # Get appropriate instruction based on field
+        instruction = self._get_field_instruction(field)
+        
         value = questionary.text(
             "Enter new value for {}:".format(field),
+            instruction=instruction,
             style=self.style
         ).ask()
-    
+
         return field, value
+
+    def _get_field_instruction(self, field: str) -> str:
+        """Get field-specific instruction"""
+        instructions = {
+            "Category": "(e.g. Health/Fitness)",
+            "Description": "(e.g. 15 minutes morning routine)",
+            "Start Date": "(Format: YYYY-MM-DD)",
+            "End Date": "(Format: YYYY-MM-DD)",
+            "Importance": "(Enter: High or Low)",
+            "Repeat": "(Enter: Daily or Weekly)"
+        }
+        return instructions.get(field, "")
 
     def process_habit_update(self, habit_id: int, field: str, value: str) -> bool:
         """Process the actual update"""
