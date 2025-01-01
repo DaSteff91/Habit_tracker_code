@@ -68,44 +68,70 @@ class HabitManagementUI(BaseUI):
 
     # Display Methods
     def display_habits_table(self, habits: List[Dict], page: int = None) -> Tuple[Dict[int, int], List[Dict]]:
-        """Display habits table with optional pagination"""
-        try:
-            if not habits:
-                print("\nNo habits found")
-                return {}, []
-
-            # Calculate pagination
-            start_idx = (page - 1) * self.items_per_page if page else 0
-            end_idx = start_idx + self.items_per_page if page else len(habits)
-            display_habits = habits[start_idx:end_idx]
-            start_count = start_idx + 1
-
-            # Create and format table
-            habit_id_map = {}
-            table = PrettyTable()
-            table.field_names = ['Row'] + self.get_table_headers()
-            
-            for idx, habit in enumerate(display_habits, start_count):
-                habit_id_map[idx] = habit['id']
-                table.add_row([
-                    idx,
-                    habit['name'],
-                    habit['category'],
-                    habit['description'][:30],
-                    habit['importance'],
-                    habit['repeat'],
-                    habit['start_date'],
-                    habit['end_date'],
-                    habit['tasks']
-                ])
-            
-            print("\nHabits Overview:")
-            print(table)
-            return habit_id_map, habits
-
-        except Exception as e:
-            print("Error displaying habits: {}".format(e))
+        """Display habits table with pagination"""
+        if not habits:
+            print("\nNo habits found")
             return {}, []
+                
+        table = self._initialize_table()
+        self._configure_columns(table)
+        habit_id_map = self._add_habit_rows(table, habits, page)
+        self._display_table(table)
+        
+        return habit_id_map, habits
+
+    def _initialize_table(self) -> PrettyTable:
+        """Initialize table with headers"""
+        table = PrettyTable()
+        table.field_names = ['Row'] + self.get_table_headers()
+        table.align = "l"
+        table.hrules = 1
+        return table
+
+    def _configure_columns(self, table: PrettyTable) -> None:
+        """Configure column widths"""
+        max_widths = {
+            'Row': 4,
+            'Name': 20,
+            'Category': 15,
+            'Description': 50,
+            'Importance': 10,
+            'Repeat': 8,
+            'Start Date': 12,
+            'End Date': 12,
+            'Tasks': 6
+        }
+        
+        for header in table.field_names:
+            table._max_width[header] = max_widths.get(header, 15)
+
+    def _add_habit_rows(self, table: PrettyTable, habits: List[Dict], page: int) -> Dict[int, int]:
+        """Add habit rows with pagination"""
+        start_idx = (page - 1) * self.items_per_page if page else 0
+        end_idx = start_idx + self.items_per_page if page else len(habits)
+        page_habits = habits[start_idx:end_idx]
+        start_count = start_idx + 1
+        
+        habit_id_map = {}
+        for idx, habit in enumerate(page_habits, start_count):
+            habit_id_map[idx] = habit['id']
+            table.add_row([
+                idx,
+                habit['name'],
+                habit['category'],
+                habit['description'][:30],
+                habit['importance'],
+                habit['repeat'],
+                habit['start_date'],
+                habit['end_date'],
+                habit['tasks']
+            ])
+        return habit_id_map
+
+    def _display_table(self, table: PrettyTable) -> None:
+        """Display formatted table"""
+        print("\nHabits Overview:")
+        print(table)
 
     def get_table_headers(self) -> List[str]:
         """Get table headers"""

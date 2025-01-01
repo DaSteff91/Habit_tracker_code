@@ -13,16 +13,50 @@ class AnalyticsUI(BaseUI):
         self.items_per_page = 15
 
     def display_paginated_analytics(self, habits: List[Dict], page: int, items_per_page: int) -> None:
-        start_idx = (page - 1) * items_per_page
-        end_idx = start_idx + items_per_page
-        page_habits = habits[start_idx:end_idx]
-        
+        """Display paginated analytics table"""
+        if not habits:
+            print("\nNo habits found")
+            return
+                
+        table = self._initialize_table()
+        self._configure_columns(table)
+        self._add_habit_rows(table, habits, page, items_per_page)
+        self._display_table(table)
+
+    def _initialize_table(self) -> PrettyTable:
+        """Initialize table with headers"""
         table = PrettyTable()
         table.field_names = [
             'Name', 'Category', 'Description', 'Repeat',
             'Days Passed', 'Success Rate', 'Current Streak',
             'Reset Count', 'Status'
         ]
+        table.align = "l"
+        table.hrules = 1
+        return table
+
+    def _configure_columns(self, table: PrettyTable) -> None:
+        """Configure column widths"""
+        max_widths = {
+            'Name': 20,
+            'Category': 15,
+            'Description': 50,
+            'Repeat': 8,
+            'Days Passed': 12,
+            'Success Rate': 12,
+            'Current Streak': 12,
+            'Reset Count': 12,
+            'Status': 10
+        }
+        
+        for header in table.field_names:
+            table._max_width[header] = max_widths.get(header, 15)
+
+    def _add_habit_rows(self, table: PrettyTable, habits: List[Dict], page: int, items_per_page: int) -> None:
+        """Add habit rows with pagination"""
+        start_idx = (page - 1) * items_per_page
+        end_idx = start_idx + items_per_page
+        page_habits = habits[start_idx:end_idx]
         
         for habit in page_habits:
             table.add_row([
@@ -36,7 +70,9 @@ class AnalyticsUI(BaseUI):
                 habit['reset_count'],
                 habit['status']
             ])
-        
+
+    def _display_table(self, table: PrettyTable) -> None:
+        """Display formatted table"""
         print("\nAnalytics Overview:")
         print(table)
 

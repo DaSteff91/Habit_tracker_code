@@ -182,13 +182,41 @@ class TaskUI(BaseUI):
         if not tasks:
             print("\nNo pending tasks found")
             return
-            
+                
+        table = self._initialize_table(headers)
+        self._configure_columns(table, headers)
+        self._add_task_rows(table, tasks, page)
+        self._display_table(table)
+
+    def _initialize_table(self, headers: List[str]) -> PrettyTable:
+        """Initialize PrettyTable with headers"""
+        table = PrettyTable()
+        table.field_names = headers
+        table.align = "l"
+        table.hrules = 1
+        return table
+
+    def _configure_columns(self, table: PrettyTable, headers: List[str]) -> None:
+        """Configure column widths and alignment"""
+        max_widths = {
+            "Row": 4,
+            "Habit Name": 20,
+            "Task Number": 6,
+            "Description": 40,
+            "Due Date": 12,
+            "Status": 8,
+            "Completion Rate": 10,
+            "Streak": 6
+        }
+        
+        for header in headers:
+            table._max_width[header] = max_widths.get(header, 15)
+
+    def _add_task_rows(self, table: PrettyTable, tasks: List[Dict], page: int) -> None:
+        """Add task rows to table with pagination"""
         start_idx = (page - 1) * self.items_per_page
         end_idx = start_idx + self.items_per_page
         page_tasks = tasks[start_idx:end_idx]
-        
-        table = PrettyTable()
-        table.field_names = headers
         
         for task in page_tasks:
             table.add_row([
@@ -201,6 +229,8 @@ class TaskUI(BaseUI):
                 task["completion_rate"],
                 task["streak"]
             ])
-        
+
+    def _display_table(self, table: PrettyTable) -> None:
+        """Display the formatted table"""
         print("\nTask Overview:")
         print(table)
