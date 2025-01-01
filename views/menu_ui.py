@@ -3,6 +3,7 @@ from .analytics_ui import AnalyticsUI
 from .task_ui import TaskUI
 from .habit_ui import HabitManagementUI
 import questionary
+import pydoc
 
 class MainUI(BaseUI):
     """Main menu and program flow"""
@@ -51,19 +52,15 @@ class MainUI(BaseUI):
     def show_help(self):
         """Display help information"""
         self.clear_screen()
-        self.show_navigation_hint()
-        
         try:
             with open('utils/help.txt', 'r') as help_file:
                 help_text = help_file.read()
-                print("\nHelp Documentation:")
-                print("=================")
-                print(help_text)
+                pydoc.pager("\nHelp Documentation:\n=================\n\n" + help_text)
+                
+            self.clear_screen()
+            
         except Exception as e:
             print("\nError loading help documentation: {}".format(e))
-        
-        input("\nPress Enter to return to main menu...")
-        self.clear_screen()
 
     def confirm_exit(self):
         """Confirm program exit"""

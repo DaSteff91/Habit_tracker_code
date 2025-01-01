@@ -3,6 +3,8 @@ NAVIGATION
 - Use arrow keys (↑↓) to move the curser
 - Enter/Return to select an item OR to go back (where the Space is used for multi select)
 - Space to check/uncheck items (in multi selections)
+- At the end of this document press q to exit
+- In worse case use CTRL + C or D to exit an unwanted loop
 
 MAIN MENU
 ------------
