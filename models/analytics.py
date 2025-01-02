@@ -55,7 +55,7 @@ class Analytics:
                 'current_streak': habit[11],
                 'longest_streak': habit[13],
                 'reset_count': habit[12],
-                'status': 'active' if not habit[6] else 'completed'
+                'importance': habit[7],
             } for habit in habits] if habits else []
         except Exception as e:
             print("Error getting analytics data: {}".format(e))

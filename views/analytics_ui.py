@@ -35,7 +35,8 @@ class AnalyticsUI(BaseUI):
             'Days Passed',
             'Success Rate',
             'Reset Count',
-            'Repeat'
+            'Repeat',
+            'Importance'
         ]
         table.align = "l"
         table.hrules = 1
@@ -52,7 +53,8 @@ class AnalyticsUI(BaseUI):
             'Days Passed': 12,
             'Success Rate': 12,
             'Reset Count': 12,
-            'Repeat': 8
+            'Repeat': 8,
+            'Importance': 10
         }
         
         for header in table.field_names:
@@ -74,7 +76,8 @@ class AnalyticsUI(BaseUI):
                 habit['days_passed'],
                 habit['success_rate'],
                 habit['reset_count'],
-                habit['repeat']
+                habit['repeat'],
+                habit['importance'] 
             ])
 
     def _display_table(self, table: PrettyTable) -> None:

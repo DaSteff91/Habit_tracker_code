@@ -24,7 +24,7 @@ class MainUI(BaseUI):
 
     def get_menu_choice(self):
         """Get main menu selection"""
-        # self.clear_screen()
+        self.clear_screen()
         self.show_navigation_hint() 
         return questionary.select(
             "What would you like to do?",
