@@ -1,6 +1,5 @@
 from database.connector import DatabaseConnector as Database
 from datetime import datetime
-import sqlite3
 from typing import Dict, Any, List, Tuple, Optional
 
 class DatabaseController:
@@ -11,55 +10,93 @@ class DatabaseController:
         self.db_name = db_name
 
     def create_data(self, table: str, data: Dict[str, Any]) -> int:
-        """Insert data into database with table-specific duplicate checks"""
+        """Create a new record in the specified table.
+        This method coordinates the main data creation process, including table validation,
+        duplicate checking, and record insertion.
+        Args:
+            table (str): The name of the table where data will be inserted
+            data (Dict[str, Any]): Dictionary containing the data to insert, where keys are column names
+                                  and values are the data to insert
+        Returns:
+            int: The ID of the newly created record if successful, -1 if operation fails
+                 Failure can occur due to:
+                 - Invalid table name
+                 - Invalid data format
+                 - Duplicate entry exists
+                 - Database connection/operation error
+        """
         try:
             with Database(self.db_name) as db:
                 db.create_tables()
                 
-                # Table-specific duplicate checks
-                if table == 'habit':
-                    try:
-                        conditions = {
-                            'name': data['name'],
-                            'description': data['description']
-                        }
-                    except KeyError as ke:
-                        print("Missing required habit field: {}".format(ke))
-                        return -1
-                        
-                elif table == 'task':
-                    try:
-                        conditions = {
-                            'task_description': data['task_description'],
-                            'habit_id': data['habit_id'],
-                            'task_number': data['task_number'],
-                            'due_date': data['due_date']  # Added due_date to conditions
-                        }
-                    except KeyError as ke:
-                        print("Missing required task field: {}".format(ke))
-                        return -1
-                else:
-                    print("Invalid table: {}".format(table))
+                # Validate table and data
+                if not self._validate_table(table):
                     return -1
                     
-                existing_entries = db.read_data(table, conditions)
-                
-                if existing_entries:
-                    print("Error: {} already exists!".format(table.capitalize()))
+                # Get and validate conditions
+                conditions = self._get_duplicate_conditions(table, data)
+                if not conditions:
                     return -1
                     
-                record_id = db.create_data(table, data)
-                return record_id
+                # Check for duplicates
+                if self._check_duplicates(db, table, conditions):
+                    return -1
+                    
+                # Create record
+                return db.create_data(table, data)
                 
-        except sqlite3.Error as e:
-            print("Database error: {}".format(e))
-            return -1
         except Exception as e:
-            print("General error: {}".format(e))
+            print("Error creating data: {}".format(e))
             return -1
+
+    def _validate_table(self, table: str) -> bool:
+        """Validate table name"""
+        if table not in ['habit', 'task']:
+            print("Invalid table: {}".format(table))
+            return False
+        return True
+
+    def _get_duplicate_conditions(self, table: str, data: Dict[str, Any]) -> Optional[Dict]:
+        """Get conditions for duplicate checking"""
+        try:
+            if table == 'habit':
+                return {
+                    'name': data['name'],
+                    'description': data['description']
+                }
+            elif table == 'task':
+                return {
+                    'task_description': data['task_description'],
+                    'habit_id': data['habit_id'],
+                    'task_number': data['task_number'],
+                    'due_date': data['due_date']
+                }
+        except KeyError as ke:
+            print("Missing required {} field: {}".format(table, ke))
+        return None
+
+    def _check_duplicates(self, db: Database, table: str, conditions: Dict) -> bool:
+        """Check for duplicate entries"""
+        existing = db.read_data(table, conditions)
+        if existing:
+            print("Error: {} already exists!".format(table.capitalize()))
+            return True
+        return False
         
     def delete_data(self, table: str, record_id: int) -> bool:
-        """Delete record and associated data"""
+        """Delete record and associated task data from the specified table.
+
+        This method deletes a record from the specified table based on the record ID.
+        If the table is 'habit', it also deletes all associated task records before
+        deleting the habit record.
+
+        Args:
+            table (str): The name of the table to delete from ('habit' or 'task')
+            record_id (int): The ID of the record to delete
+
+        Returns:
+            bool: True if deletion was successful, False otherwise
+        """
         try:
             with Database(self.db_name) as db:
                 if table == 'habit':
@@ -71,7 +108,15 @@ class DatabaseController:
             return False
 
     def update_data(self, table: str, record_id: int, new_data: Dict[str, Any]) -> bool:
-        """Update existing record with verification"""
+        """
+        Update an existing record in the specified table with new data.
+        Args:
+            table (str): The name of the table where the record exists.
+            record_id (int): The ID of the record to be updated.
+            new_data (Dict[str, Any]): A dictionary containing the new data to update the record with.
+        Returns:
+            bool: True if the update was successful, False otherwise.
+        """
         try:
             with Database(self.db_name) as db:
                 if not db.read_data(table, {'id': record_id}):
