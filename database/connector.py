@@ -48,9 +48,11 @@ class DatabaseConnector:
                 tasks INT NOT NULL,
                 tasks_description TEXT NOT NULL,
                 streak INT NOT NULL DEFAULT 0,
-                streak_reset_count INT NOT NULL DEFAULT 0
+                streak_reset_count INT NOT NULL DEFAULT 0,
+                longest_streak INT NOT NULL DEFAULT 0 
             )""")
 # reworking naming in the database at some point!! task_number = number ...
+            
             self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS task (
                 id INTEGER PRIMARY KEY,

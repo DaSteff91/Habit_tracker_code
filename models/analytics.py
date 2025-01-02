@@ -46,22 +46,19 @@ class Analytics:
         try:
             habits = db.read_data('habit')
             return [{
-                'id': habit[0],
                 'name': habit[1],
-                'category': habit[2],
-                'description': habit[3][:30],
+                'category': habit[2], 
+                'description': habit[3],
                 'repeat': habit[8],
-                'start': habit[5],  # Keep key as 'start'
                 'days_passed': self.calculate_passed_days(habit[5]),
-                'success_rate': self.calculate_success_rate(
-                    habit[5], habit[8], habit[11], habit[12]
-                ),
+                'success_rate': self.calculate_success_rate(habit[5], habit[8], habit[11], habit[12]),
                 'current_streak': habit[11],
+                'longest_streak': habit[13],
                 'reset_count': habit[12],
-                'status': habit[7]
+                'status': 'active' if not habit[6] else 'completed'
             } for habit in habits] if habits else []
         except Exception as e:
-            print(f"Error getting analytics data: {e}")
+            print("Error getting analytics data: {}".format(e))
             return []
         
     def sort_analytics_data(self, data: List[Dict], sort_by: str, ascending: bool = True) -> List[Dict]:

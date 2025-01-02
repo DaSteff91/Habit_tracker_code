@@ -28,7 +28,7 @@ class AnalyticsUI(BaseUI):
         table = PrettyTable()
         table.field_names = [
             'Name', 'Category', 'Description', 'Repeat',
-            'Days Passed', 'Success Rate', 'Current Streak',
+            'Days Passed', 'Success Rate', 'Current Streak', 'Longest Streak'
             'Reset Count', 'Status'
         ]
         table.align = "l"
@@ -45,6 +45,7 @@ class AnalyticsUI(BaseUI):
             'Days Passed': 12,
             'Success Rate': 12,
             'Current Streak': 12,
+            'Longest Streak': 12,
             'Reset Count': 12,
             'Status': 10
         }

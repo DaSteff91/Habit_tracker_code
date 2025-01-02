@@ -174,12 +174,19 @@ class Habit:
 
     # Business logic
     def increment_streak(self) -> bool:
-        """Increment streak counter"""
+        """Increment streak and update longest streak if needed"""
         try:
             self.streak += 1
-            return self.update({'streak': self.streak})
+            update_data = {'streak': self.streak}
+            
+            # Update longest streak if current streak is higher
+            if self.streak > self.longest_streak:
+                self.longest_streak = self.streak
+                update_data['longest_streak'] = self.longest_streak
+                
+            return self.update(update_data)
         except Exception as e:
-            print(f"Error incrementing streak: {e}")
+            print("Error updating streak: {}".format(e))
             return False
         
     def reset_streak(self) -> bool:
