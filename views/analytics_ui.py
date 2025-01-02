@@ -27,9 +27,15 @@ class AnalyticsUI(BaseUI):
         """Initialize table with headers"""
         table = PrettyTable()
         table.field_names = [
-            'Name', 'Category', 'Description', 'Repeat',
-            'Days Passed', 'Success Rate', 'Current Streak', 'Longest Streak'
-            'Reset Count', 'Status'
+            'Name', 
+            'Category', 
+            'Description',
+            'Current Streak',
+            'Longest Streak', 
+            'Days Passed',
+            'Success Rate',
+            'Reset Count',
+            'Repeat'
         ]
         table.align = "l"
         table.hrules = 1
@@ -41,13 +47,12 @@ class AnalyticsUI(BaseUI):
             'Name': 20,
             'Category': 15,
             'Description': 50,
-            'Repeat': 8,
-            'Days Passed': 12,
-            'Success Rate': 12,
             'Current Streak': 12,
             'Longest Streak': 12,
+            'Days Passed': 12,
+            'Success Rate': 12,
             'Reset Count': 12,
-            'Status': 10
+            'Repeat': 8
         }
         
         for header in table.field_names:
@@ -58,18 +63,18 @@ class AnalyticsUI(BaseUI):
         start_idx = (page - 1) * items_per_page
         end_idx = start_idx + items_per_page
         page_habits = habits[start_idx:end_idx]
-        
+            
         for habit in page_habits:
             table.add_row([
                 habit['name'],
                 habit['category'],
                 habit['description'],
-                habit['repeat'],
+                habit['current_streak'],
+                habit['longest_streak'],
                 habit['days_passed'],
                 habit['success_rate'],
-                habit['current_streak'],
                 habit['reset_count'],
-                habit['status']
+                habit['repeat']
             ])
 
     def _display_table(self, table: PrettyTable) -> None:
