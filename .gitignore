@@ -10,7 +10,7 @@ venv/
 
 # Project specific
 Backup_*/
-*.db
+**.db
 *.sqlite3
 
 # IDE
