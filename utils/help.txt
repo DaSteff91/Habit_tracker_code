@@ -41,10 +41,14 @@ HABIT MANAGEMENT
 
 ANALYTICS
 -----------
-- View success rates and streaks for all habits
 - Filter habits by category, status, etc.
 - Sort by different criteria (name, streak, etc.)
-
+- Calculated columns:
+  * Current Streak: For how many continues attempts (daily/ weekly) you marked all tasks as done
+  * Longest Streak: Stores the longest ever achieved streak for this habit
+  * Days Passed: How many days have been passed since started tracking. Max. = end date of tracking
+  * Success Rate: How successfull you were to start and hold a streak 
+  * Reset Count: How many times the streak have been reseted due to a task marked as ignor or pause habit
 
 EXAMPLE
 -----------

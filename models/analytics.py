@@ -9,12 +9,17 @@ class Analytics:
         self.db_controller = db_controller or DatabaseController()
 
     @classmethod
-    def calculate_passed_days(cls, start_date: str) -> int:
-        """Calculate days passed since start date"""
+    def calculate_passed_days(cls, start_date: str, end_date: str) -> int:
+        """Calculate days passed since start date, limited by end date"""
         try:
             start = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end = datetime.strptime(end_date, '%Y-%m-%d').date() if end_date else datetime.now().date()
             today = datetime.now().date()
-            return (today - start).days if start <= today else 0
+            
+            # Use earlier date between today and end_date
+            reference_date = min(today, end)
+            
+            return (reference_date - start).days if start <= reference_date else 0
         except Exception as e:
             print("Error calculating passed days: {}".format(e))
             return 0
@@ -103,7 +108,7 @@ class Analytics:
                 'category': habit[2], 
                 'description': habit[3],
                 'repeat': habit[8],
-                'days_passed': self.calculate_passed_days(habit[5]),
+                'days_passed': self.calculate_passed_days(habit[5], habit[6]),
                 'success_rate': self.calculate_success_rate(habit[0]),
                 'current_streak': habit[11],
                 'longest_streak': habit[13],
