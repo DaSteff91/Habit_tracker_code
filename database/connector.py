@@ -17,59 +17,60 @@ class DatabaseConnector:
         except sqlite3.Error as e:
             print("Connection error: {}".format(e))
 
-    def create_tables(self) -> None:
-        """
-        Creates the necessary tables for the habit tracker database if they do not already exist.
+    def create_tables(self) -> bool:
+        """Create necessary database tables.
 
-        This method creates two tables:
-        1. habit: Stores information about each habit, including its name, category, description, 
-           creation time, start and stop times, importance, repeat frequency, tasks count, 
-           tasks description, and current streak.
-        2. task: Stores information about tasks associated with each habit, including the task 
-           description, status, due date, and a foreign key linking it to the habit table.
+        This method initializes the database by creating required tables for habits and tasks.
+        It calls private methods to create individual tables and commits the changes.
 
-        If an error occurs during the table creation, it prints an error message.
+        Returns:
+            bool: True if tables were created successfully, False if an error occurred during creation.
 
         Raises:
-            sqlite3.Error: If there is an error creating the tables.
+            sqlite3.Error: If there is an error while creating the tables or committing changes.
         """
         try:
-            self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS habit (
-                id INTEGER PRIMARY KEY,
-                name TEXT NOT NULL,
-                category TEXT NOT NULL,
-                description TEXT NOT NULL,
-                created TEXT NOT NULL,
-                start TEXT NOT NULL,
-                stop TEXT,
-                importance TEXT NOT NULL,
-                repeat TEXT NOT NULL,
-                tasks INT NOT NULL,
-                tasks_description TEXT NOT NULL,
-                streak INT NOT NULL DEFAULT 0,
-                streak_reset_count INT NOT NULL DEFAULT 0,
-                longest_streak INT NOT NULL DEFAULT 0 
-            )""")
-# reworking naming in the database at some point!! task_number = number ...
-            
-            self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS task (
-                id INTEGER PRIMARY KEY,
-                habit_id INTEGER NOT NULL,
-                task_number INTEGER NOT NULL,
-                task_description TEXT NOT NULL,
-                created TEXT NOT NULL,
-                due_date TEXT NOT NULL,
-                status TEXT NOT NULL,
-                FOREIGN KEY (habit_id) REFERENCES habit (id)
-            )""")
-            
+            self._create_habit_table()
+            self._create_task_table()
             self.connection.commit()
             return True
         except sqlite3.Error as e:
-            print(f"Error creating tables: {e}")
+            print("Error creating tables: {}".format(e))
             return False
+
+    def _create_habit_table(self) -> None:
+        """Create habit table with schema"""
+        self.cursor.execute("""
+        CREATE TABLE IF NOT EXISTS habit (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            category TEXT NOT NULL,
+            description TEXT NOT NULL,
+            created TEXT NOT NULL,
+            start TEXT NOT NULL,
+            stop TEXT,
+            importance TEXT NOT NULL,
+            repeat TEXT NOT NULL,
+            tasks INT NOT NULL,
+            tasks_description TEXT NOT NULL,
+            streak INT NOT NULL DEFAULT 0,
+            streak_reset_count INT NOT NULL DEFAULT 0,
+            longest_streak INT NOT NULL DEFAULT 0 
+        )""")
+
+    def _create_task_table(self) -> None:
+        """Create task table with schema and foreign key"""
+        self.cursor.execute("""
+        CREATE TABLE IF NOT EXISTS task (
+            id INTEGER PRIMARY KEY,
+            habit_id INTEGER NOT NULL,
+            task_number INTEGER NOT NULL,
+            task_description TEXT NOT NULL,
+            created TEXT NOT NULL,
+            due_date TEXT NOT NULL,
+            status TEXT NOT NULL,
+            FOREIGN KEY (habit_id) REFERENCES habit (id)
+        )""")
 
     def create_data(self, table: str, data: dict) -> int:
         """
@@ -162,9 +163,6 @@ class DatabaseConnector:
 
         Returns:
             bool: True if the deletion was successful, False otherwise.
-
-        Raises:
-            sqlite3.Error: If an error occurs during the deletion process.
         """
         try:
             where_clause = ' AND '.join(["{} = ?".format(k) for k in conditions.keys()])

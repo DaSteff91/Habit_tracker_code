@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Dict, Optional
 from database.operations import DatabaseController
 
@@ -20,25 +20,78 @@ class Analytics:
             return 0
 
     @classmethod
-    def calculate_success_rate(cls, start_date: str, repeat: str, 
-                             streak: int, reset_count: int) -> str:
-        """Calculate habit success rate"""
+    def calculate_success_rate(cls, habit_id: int) -> str:
+        """Calculate success rate based on completed task days"""
         try:
-            days_passed = cls.calculate_passed_days(start_date)
-            if days_passed == 0:
-                return "N/A"
-
-            possible_occurrences = days_passed
-            if repeat == "Weekly":
-                possible_occurrences = days_passed // 7
-
-            if possible_occurrences > 0:
-                success_rate = ((possible_occurrences - reset_count) / possible_occurrences) * 100
+            db = DatabaseController()
+            tasks = db.read_data('task', {'habit_id': habit_id})
+            
+            # Get habit data
+            habits = db.read_data('habit', {'id': habit_id})
+            habit = habits[0] if habits else None
+            
+            # Group by period (daily/weekly)
+            if habit:
+                # Need to pass cls as first argument since it's a classmethod
+                grouped = cls._group_tasks_by_period(tasks, habit[8])  # habit[8] is repeat interval
+                
+                # Rest of the method...
+                successful_periods = sum(1 for tasks in grouped.values() 
+                                    if all(t[6] == 'done' for t in tasks))
+                total_periods = len(grouped)
+                
+                if total_periods == 0:
+                    return "N/A"
+                    
+                success_rate = (successful_periods / total_periods) * 100
                 return "{:.0f}%".format(max(0, min(100, success_rate)))
-            return "0%"
+                
         except Exception as e:
             print("Error calculating success rate: {}".format(e))
             return "N/A"
+
+    def _get_habit_data(self, habit_id: int, db: DatabaseController) -> Optional[tuple]:
+        """Get habit data from database"""
+        habits = db.read_data('habit', {'id': habit_id})
+        return habits[0] if habits else None
+
+    def _get_task_statistics(self, habit_id: int, repeat: str, db: DatabaseController) -> Dict:
+        """Calculate task completion statistics"""
+        tasks = db.read_data('task', {'habit_id': habit_id})
+        if not tasks:
+            return {'successful_days': 0, 'total_days': 0}
+        
+        # Group tasks by due_date or week
+        grouped_tasks = self._group_tasks_by_period(tasks, repeat)
+        
+        # Count successful periods (all tasks done) vs total periods
+        successful = sum(1 for tasks in grouped_tasks.values() 
+                        if all(t[6] == 'done' for t in tasks))
+        
+        return {
+            'successful_days': successful,
+            'total_days': len(grouped_tasks)
+        }
+
+    @classmethod  # Add classmethod decorator
+    def _group_tasks_by_period(cls, tasks: List[tuple], repeat: str) -> Dict:
+        """Group tasks by day or week based on repeat interval"""
+        grouped = {}
+        for task in tasks:
+            due_date = task[5]  # due_date field
+            
+            if repeat == 'Weekly':
+                # Get week start date
+                date = datetime.strptime(due_date, '%Y-%m-%d')
+                key = (date - timedelta(days=date.weekday())).strftime('%Y-%m-%d')
+            else:
+                key = due_date
+                
+            if key not in grouped:
+                grouped[key] = []
+            grouped[key].append(task)
+            
+        return grouped
 
     def get_analytics_data(self) -> List[Dict]:
         """Get formatted analytics data"""
@@ -51,11 +104,11 @@ class Analytics:
                 'description': habit[3],
                 'repeat': habit[8],
                 'days_passed': self.calculate_passed_days(habit[5]),
-                'success_rate': self.calculate_success_rate(habit[5], habit[8], habit[11], habit[12]),
+                'success_rate': self.calculate_success_rate(habit[0]),
                 'current_streak': habit[11],
                 'longest_streak': habit[13],
                 'reset_count': habit[12],
-                'importance': habit[7],
+                'importance': habit[7]
             } for habit in habits] if habits else []
         except Exception as e:
             print("Error getting analytics data: {}".format(e))
