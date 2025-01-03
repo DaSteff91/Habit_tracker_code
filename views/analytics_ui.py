@@ -142,17 +142,23 @@ class AnalyticsUI(BaseUI):
         """Handle habit sorting workflow"""
         sort_by = questionary.select(
             "Sort by:",
-            choices=self.get_sortable_fields(),
+            choices=self.get_sortable_fields() + ["Cancel"],
             style=self.style
         ).ask()
         
+        if sort_by == "Cancel":
+            return data
+            
         if sort_by:
             order = questionary.select(
                 "Order:",
-                choices=["Ascending", "Descending"],
+                choices=["Ascending", "Descending", "Cancel"],
                 style=self.style
             ).ask()
             
+            if order == "Cancel":
+                return data
+                
             if order:
                 self.current_sort = {
                     'field': sort_by.lower().replace(' ', '_'),
@@ -169,13 +175,16 @@ class AnalyticsUI(BaseUI):
         """Handle habit filtering workflow"""
         field = questionary.select(
             "Select field to filter by:",
-            choices=self.get_filterable_fields(),
+            choices=self.get_filterable_fields() + ["Cancel"],
             style=self.style
         ).ask()
         
+        if field == "Cancel":
+            return data
+            
         if field:
             values = self.get_unique_field_values(data, field)
-            values.append("Reset Filter")
+            values.extend(["Reset Filter", "Cancel"])
             
             value = questionary.select(
                 f"Select {field.lower()} value:",
@@ -183,6 +192,9 @@ class AnalyticsUI(BaseUI):
                 style=self.style
             ).ask()
             
+            if value == "Cancel":
+                return data
+                
             if value == "Reset Filter":
                 return self.analytics_controller.get_analytics_data()
                 
