@@ -1,6 +1,7 @@
 from typing import Dict, Any, Optional, List, Tuple
 from datetime import datetime
 from database.operations import DatabaseController
+from models.task import Task
 
 class Habit:
     """Habit data model with database operations and business logic"""
@@ -47,16 +48,22 @@ class Habit:
 
     @classmethod
     def create(cls, data: Dict[str, Any]) -> Optional['Habit']:
-        """Create new habit"""
+        """Create new habit with tasks"""
         try:
             data = cls._prepare_data(data)
             db = DatabaseController()
             habit_id = db.create_data('habit', data)
             if habit_id == -1:
                 return None
+                
+            # Create tasks right after habit creation
+            if not Task.create_series(habit_id, data):
+                db.delete_data('habit', habit_id)
+                return None
+                
             return cls.get_by_id(habit_id)
         except Exception as e:
-            print(f"Error creating habit: {e}")
+            print("Error creating habit: {}".format(e))
             return None
 
     @classmethod
