@@ -1,17 +1,12 @@
 import pytest
-from datetime import datetime
 import os
-import sqlite3
-from database.connector import DatabaseConnector
-from database.operations import DatabaseController
+from utils.db import TestDatabaseConnector
 
 @pytest.fixture
 def test_db():
     """Provide test database connection"""
     db_name = "test.db"
-    # Setup
-    db = DatabaseConnector(db_name)
-    db.create_tables()
+    db = TestDatabaseConnector(db_name)
     yield db
     # Teardown
     db.close()
@@ -47,9 +42,8 @@ def sample_task_data():
 @pytest.fixture
 def test_db_with_habit(test_db, sample_habit_data):
     """Provide test database with sample habit"""
-    db = DatabaseController("test.db")
-    habit_id = db.create_data('habit', sample_habit_data)
-    yield db, habit_id
+    habit_id = test_db.create_test_habit(sample_habit_data)
+    yield test_db, habit_id
 
 @pytest.fixture
 def test_db_with_tasks(test_db_with_habit, sample_task_data):
@@ -57,5 +51,5 @@ def test_db_with_tasks(test_db_with_habit, sample_task_data):
     db, habit_id = test_db_with_habit
     task_data = sample_task_data.copy()
     task_data['habit_id'] = habit_id
-    task_id = db.create_data('task', task_data)
+    task_id = db.create_test_task(task_data)
     yield db, habit_id, task_id
