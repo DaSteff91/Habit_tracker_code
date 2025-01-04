@@ -12,7 +12,10 @@ class DatabaseConnector:
     def connect(self) -> None:
         """Establish database connection"""
         try:
-            self.connection = sqlite3.connect(self.db_name)
+            self.connection = sqlite3.connect(
+                self.db_name,
+                timeout=10,
+                isolation_level=None)
             self.cursor = self.connection.cursor()
         except sqlite3.Error as e:
             print("Connection error: {}".format(e))
