@@ -28,6 +28,7 @@ class Habit:
         self.tasks = tasks
         self.tasks_description = tasks_description
         self.streak = 0
+        self.longest_streak = 0
         self.reset_count = 0
         self.created = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         self.db_controller = db_controller or DatabaseController()

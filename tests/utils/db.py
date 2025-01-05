@@ -1,7 +1,7 @@
 import sqlite3
 from typing import Optional, List, Tuple, Dict, Any
 
-class TestDatabaseConnector:
+class DatabaseConnectorTesting:
     """Test-specific database connector"""
     def __init__(self, db_name: str):
         self.db_name = db_name

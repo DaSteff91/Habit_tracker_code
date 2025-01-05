@@ -1,12 +1,12 @@
 import pytest
 import os
-from tests.utils.db import TestDatabaseConnector
+from tests.utils.db import DatabaseConnectorTesting
 
 @pytest.fixture
 def test_db():
     """Provide test database connection"""
     db_name = "test.db"
-    db = TestDatabaseConnector(db_name)
+    db = DatabaseConnectorTesting(db_name)
     db.connect()
     yield db
     # Teardown
