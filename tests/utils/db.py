@@ -11,6 +11,7 @@ class TestDatabaseConnector:
     def connect(self):
         self.connection = sqlite3.connect(self.db_name)
         self.cursor = self.connection.cursor()
+        self.create_tables()
         
     def create_tables(self) -> bool:
         """Create necessary database tables"""
