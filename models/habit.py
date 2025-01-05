@@ -190,19 +190,28 @@ class Habit:
 
     # Business logic
     def increment_streak(self) -> bool:
-        """Increment streak and update longest streak if needed"""
+        """Increment streak"""
         try:
             self.streak += 1
-            update_data = {'streak': self.streak}
-            
-            # Update longest streak if current streak is higher
-            if self.streak > self.longest_streak:
-                self.longest_streak = self.streak
-                update_data['longest_streak'] = self.longest_streak
-                
-            return self.update(update_data)
+            success = self.update({'streak': self.streak})
+            if success:
+                return self.update_longest_streak()
+            return False
         except Exception as e:
             print("Error updating streak: {}".format(e))
+            return False
+
+    def update_longest_streak(self) -> bool:
+        """Update longest streak if current is higher"""
+        try:
+            if not hasattr(self, 'longest_streak'):
+                self.longest_streak = 0
+            if self.streak > self.longest_streak:
+                self.longest_streak = self.streak
+                return self.update({'longest_streak': self.longest_streak})
+            return True
+        except Exception as e:
+            print("Error updating longest streak: {}".format(e))
             return False
         
     def reset_streak(self) -> bool:
