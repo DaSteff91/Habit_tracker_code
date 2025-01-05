@@ -131,7 +131,7 @@ class Task:
             # Convert string to datetime for comparison
             next_due_dt = datetime.strptime(next_due, '%Y-%m-%d')
             
-            if cls._is_past_end_date(next_due_dt, habit[6]):  # habit[6] is stop_date
+            if cls._is_past_end_date(next_due_dt, habit[6]):  # habit[6] is end date
                 print("Habit {} completed - end date reached".format(habit_id))
                 return False
                 

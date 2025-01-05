@@ -16,13 +16,13 @@ def test_db():
 
 @pytest.fixture
 def sample_habit_data():
-    """Provide sample habit data"""
+    """Provide sample habit data that match Habit class __init__ parameters"""
     return {
         'name': 'Test Habit',
         'category': 'Test',
         'description': 'Test Description',
         'start': '2024-01-01',
-        'stop': '2024-12-31',
+        'end': '2024-12-31',     
         'importance': 'High',
         'repeat': 'Daily',
         'tasks': 1,

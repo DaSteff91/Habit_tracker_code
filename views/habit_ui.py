@@ -215,7 +215,7 @@ class HabitManagementUI(BaseUI):
             },
             {
                 "type": "text",
-                "name": "stop",
+                "name": "end",
                 "message": "Enter end date:",
                 "instruction": "(Format: YYYY-MM-DD)"
             },

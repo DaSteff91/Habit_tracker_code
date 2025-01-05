@@ -170,7 +170,7 @@ class Habit:
             'category': self.category,
             'description': self.description,
             'start': self.start,
-            'stop': self.end,
+            'end': self.end,
             'importance': self.importance,
             'repeat': self.repeat,
             'tasks': self.tasks,
