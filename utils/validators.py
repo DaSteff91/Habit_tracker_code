@@ -139,13 +139,3 @@ class TaskValidator:
             return True
         except ValueError:
             return False
-
-    # @staticmethod
-    # def validate_date_format(date_str: str) -> bool:
-    #         # Does the task really need a validation for the date??
-    #     """Validate date format"""
-    #     try:
-    #         datetime.strptime(date_str, '%Y-%m-%d')
-    #         return True
-    #     except ValueError:
-    #         return False

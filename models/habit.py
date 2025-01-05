@@ -46,39 +46,39 @@ class Habit:
         return prepared
 
     @classmethod
-    def create(cls, data: Dict[str, Any]) -> Optional['Habit']:
+    def create(cls, data: Dict[str, Any], db_controller: Optional[DatabaseController] = None) -> Optional['Habit']:
         """Create new habit"""
         try:
             data = cls._prepare_data(data)
-            db = DatabaseController()
+            db = db_controller or DatabaseController()
             habit_id = db.create_data('habit', data)
             if habit_id == -1:
                 return None
-            return cls.get_by_id(habit_id)
+            return cls.get_by_id(habit_id, db)
         except Exception as e:
-            print(f"Error creating habit: {e}")
+            print("Error creating habit: {}".format(e))
             return None
 
     @classmethod
-    def get_by_id(cls, habit_id: int) -> Optional['Habit']:
+    def get_by_id(cls, habit_id: int, db_controller: Optional[DatabaseController] = None) -> Optional['Habit']:
         """Get habit by ID"""
-        db = DatabaseController()
+        db = db_controller or DatabaseController()
         try:
             habits = db.read_data('habit', {'id': habit_id})
             return cls.from_db_tuple(habits[0]) if habits else None
         except Exception as e:
-            print(f"Error getting habit: {e}")
+            print("Error getting habit: {}".format(e))
             return None
 
     @classmethod
-    def get_all(cls) -> List['Habit']:
+    def get_all(cls, db_controller: Optional[DatabaseController] = None) -> List['Habit']:
         """Get all habits"""
-        db = DatabaseController()
+        db = db_controller or DatabaseController()
         try:
             habits = db.read_data('habit')
             return [cls.from_db_tuple(habit) for habit in habits]
         except Exception as e:
-            print(f"Error getting habits: {e}")
+            print("Error getting habits: {}".format(e))
             return []
 
     @classmethod

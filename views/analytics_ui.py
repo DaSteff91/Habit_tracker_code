@@ -220,7 +220,6 @@ class AnalyticsUI(BaseUI):
 
     def get_unique_field_values(self, habits: List[Dict], field: str) -> List[str]:
         """Get unique values for field"""
-        # Map UI fields to dict keys
         field_mapping = {
             'Name': 'name',
             'Category': 'category', 
@@ -232,8 +231,6 @@ class AnalyticsUI(BaseUI):
         key = field_mapping.get(field)
         if not key:
             return []
-            
-        # Get unique values using dict access
         return sorted(set(habit[key] for habit in habits))
     
     def process_analytics_action(self, habits: List[tuple], action: str) -> List[tuple]:

@@ -25,10 +25,10 @@ class Analytics:
             return 0
 
     @classmethod
-    def calculate_success_rate(cls, habit_id: int) -> str:
+    def calculate_success_rate(cls, habit_id: int, db_controller: Optional[DatabaseController] = None) -> str:
         """Calculate success rate based on completed task days"""
         try:
-            db = DatabaseController()
+            db = db_controller or DatabaseController()
             tasks = db.read_data('task', {'habit_id': habit_id})
             
             # Get habit data
@@ -55,13 +55,15 @@ class Analytics:
             print("Error calculating success rate: {}".format(e))
             return "N/A"
 
-    def _get_habit_data(self, habit_id: int, db: DatabaseController) -> Optional[tuple]:
+    def _get_habit_data(self, habit_id: int, db_controller: Optional[DatabaseController] = None) -> Optional[tuple]:
         """Get habit data from database"""
+        db = db_controller or DatabaseController()
         habits = db.read_data('habit', {'id': habit_id})
         return habits[0] if habits else None
 
-    def _get_task_statistics(self, habit_id: int, repeat: str, db: DatabaseController) -> Dict:
+    def _get_task_statistics(self, habit_id: int, repeat: str, db_controller: Optional[DatabaseController] = None) -> Dict:
         """Calculate task completion statistics"""
+        db = db_controller or DatabaseController()
         tasks = db.read_data('task', {'habit_id': habit_id})
         if not tasks:
             return {'successful_days': 0, 'total_days': 0}
@@ -98,9 +100,9 @@ class Analytics:
             
         return grouped
 
-    def get_analytics_data(self) -> List[Dict]:
+    def get_analytics_data(self, db_controller: Optional[DatabaseController] = None) -> List[Dict]:
         """Get formatted analytics data"""
-        db = DatabaseController()
+        db = db_controller or DatabaseController()
         try:
             habits = db.read_data('habit')
             return [{
