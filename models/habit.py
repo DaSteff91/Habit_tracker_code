@@ -49,12 +49,20 @@ class Habit:
     def create(cls, data: Dict[str, Any], db_controller: Optional[DatabaseController] = None) -> Optional['Habit']:
         """Create new habit"""
         try:
-            data = cls._prepare_data(data)
+            # Store original data for object creation
+            init_data = data.copy()
+            
+            # Prepare data for database
+            db_data = cls._prepare_data(data)
             db = db_controller or DatabaseController()
-            habit_id = db.create_data('habit', data)
+            
+            # Create in database
+            habit_id = db.create_data('habit', db_data)
             if habit_id == -1:
                 return None
-            return cls.get_by_id(habit_id, db_controller=db, **data)
+                
+            # Create object with original data
+            return cls.get_by_id(habit_id, db_controller=db, **init_data)
         except Exception as e:
             print("Error creating habit: {}".format(e))
             return None

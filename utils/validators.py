@@ -29,7 +29,7 @@ class HabitValidator:
         try:
             # Required fields check
             required_fields = [
-                'name', 'category', 'description', 'start', 'stop',
+                'name', 'category', 'description', 'start', 'end',
                 'importance', 'repeat', 'tasks', 'tasks_description'
             ]
             for field in required_fields:
@@ -43,7 +43,7 @@ class HabitValidator:
                 return False, "Maximum 10 tasks allowed per habit"
                 
             # Date validations
-            date_fields = ['start', 'stop']
+            date_fields = ['start', 'end']
             dates = {}
             for field in date_fields:
                 try:
@@ -51,8 +51,8 @@ class HabitValidator:
                 except ValueError:
                     return False, f"Invalid date format for {field}: Use YYYY-MM-DD"
             
-            if dates['start'] >= dates['stop']:
-                return False, "Start date must be before stop date"
+            if dates['start'] >= dates['end']:
+                return False, "Start date must be before end date"
                 
             if updating_field == 'start' and dates['start'].date() < datetime.now().date():
                 return False, "Start date cannot be in the past"
