@@ -33,7 +33,7 @@ class TestDatabaseConnector:
             description TEXT NOT NULL,
             created TEXT NOT NULL,
             start TEXT NOT NULL,
-            stop TEXT,
+            end TEXT,
             importance TEXT NOT NULL,
             repeat TEXT NOT NULL,
             tasks INT NOT NULL,
@@ -61,8 +61,10 @@ class TestDatabaseConnector:
         """Create test record"""
         columns = ', '.join(data.keys())
         placeholders = ', '.join(['?' for _ in data])
-        query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
+        query = "INSERT INTO {} ({}) VALUES ({})".format(
+            table, columns, placeholders)
         self.cursor.execute(query, list(data.values()))
+        self.connection.commit()
         return self.cursor.lastrowid
 
     def read_data(self, table: str, conditions: Dict = None) -> List[Tuple]:
@@ -75,6 +77,23 @@ class TestDatabaseConnector:
         else:
             self.cursor.execute(query)
         return self.cursor.fetchall()
+    
+    def update_data(self, table: str, record_id: int, data: Dict[str, Any]) -> bool:
+        """Update test record"""
+        set_clause = ', '.join([f"{k}=?" for k in data.keys()])
+        query = "UPDATE {} SET {} WHERE id=?".format(table, set_clause)
+        values = list(data.values()) + [record_id]
+        self.cursor.execute(query, values)
+        self.connection.commit() 
+        return True
+
+    def delete_data(self, table: str, record_id: int) -> bool:
+            """Delete test record"""
+            self.cursor.execute(
+                "DELETE FROM {} WHERE id=?".format(table), 
+                [record_id])
+            self.connection.commit()
+            return True
 
     def create_test_habit(self, habit_data: Dict[str, Any]) -> int:
         """Create test habit and return ID"""

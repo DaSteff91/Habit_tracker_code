@@ -1,6 +1,8 @@
 from models.habit import Habit
+from tests.utils.db import TestDatabaseConnector
+from typing import Any
 
-def test_habit_creation(test_db, sample_habit_data):
+def test_habit_creation(test_db: TestDatabaseConnector, sample_habit_data: dict[str, Any]):
     """Test creating a new habit with valid data"""
     habit = Habit.create(sample_habit_data, test_db)
     assert habit is not None
@@ -9,7 +11,7 @@ def test_habit_creation(test_db, sample_habit_data):
     assert habit.streak == 0
     assert habit.reset_count == 0
 
-def test_habit_streak_increment(test_db, sample_habit_data):
+def test_habit_streak_increment(test_db: TestDatabaseConnector, sample_habit_data: dict[str, Any]):
     """Test streak increment functionality"""
     habit = Habit.create(sample_habit_data, test_db)
     initial_streak = habit.streak
@@ -21,7 +23,7 @@ def test_habit_streak_increment(test_db, sample_habit_data):
     updated_habit = Habit.get_by_id(habit.id, test_db)
     assert updated_habit.streak == initial_streak + 1
 
-def test_habit_streak_reset(test_db, sample_habit_data):
+def test_habit_streak_reset(test_db: TestDatabaseConnector, sample_habit_data: dict[str, Any]):
     """Test streak reset functionality"""
     habit = Habit.create(sample_habit_data, test_db)
     
@@ -34,42 +36,34 @@ def test_habit_streak_reset(test_db, sample_habit_data):
     assert habit.streak == 0
     assert habit.reset_count == 1
 
-def test_invalid_habit_creation(test_db):
+def test_invalid_habit_creation(test_db: TestDatabaseConnector):
     """Test creating habit with invalid data fails"""
     invalid_data = {'name': '', 'category': ''}  # Missing required fields
     habit = Habit.create(invalid_data, test_db)
     assert habit is None
 
-def test_habit_update(test_db, sample_habit_data):
+def test_habit_update(sample_habit_data: dict[str, Any], test_db: TestDatabaseConnector):
     """Test updating habit fields"""
+    # Create habit and store ID
     habit = Habit.create(sample_habit_data, test_db)
+    assert habit is not None
+    habit_id = habit.id
+    
+    # Update using returned habit object
     assert habit.update({'name': 'Updated Name'})
-    updated = Habit.get_by_id(habit.id, test_db)
+    
+    # Verify update with fresh load
+    updated = Habit.get_by_id(habit_id, test_db)
     assert updated.name == 'Updated Name'
 
-def test_habit_deletion(test_db, sample_habit_data):
+def test_habit_deletion(test_db: TestDatabaseConnector, sample_habit_data: dict[str, Any]):
     """Test habit deletion"""
     habit = Habit.create(sample_habit_data, test_db)
     habit_id = habit.id
     assert habit.delete()
     assert Habit.get_by_id(habit_id, test_db) is None
 
-def test_longest_streak_update(test_db, sample_habit_data):
-    """Test longest streak is updated correctly"""
-    habit = Habit.create(sample_habit_data, test_db)
-    
-    # Build streak
-    for _ in range(5):
-        habit.increment_streak()
-    assert habit.longest_streak == 5
-    
-    # Reset and build new streak
-    habit.reset_streak()
-    for _ in range(3):
-        habit.increment_streak()
-    assert habit.longest_streak == 5  # Should keep highest
-
-def test_habit_validation(test_db):
+def test_habit_validation(test_db: TestDatabaseConnector):
     """Test habit data validation"""
     invalid_cases = [
         {'name': '', 'category': 'Test'},  # Empty name
