@@ -9,14 +9,14 @@ class Analytics:
         self.db_controller = db_controller or DatabaseController()
 
     @classmethod
-    def calculate_passed_days(cls, start_date: str, end_date: str) -> int:
+    def calculate_passed_days(cls, start: str, end: str) -> int:
         """Calculate days passed since start date, limited by end date"""
         try:
-            start = datetime.strptime(start_date, '%Y-%m-%d').date()
-            end = datetime.strptime(end_date, '%Y-%m-%d').date() if end_date else datetime.now().date()
+            start = datetime.strptime(start, '%Y-%m-%d').date()
+            end = datetime.strptime(end, '%Y-%m-%d').date() if end else datetime.now().date()
             today = datetime.now().date()
             
-            # Use earlier date between today and end_date
+            # Use earlier date between today and end date
             reference_date = min(today, end)
             
             return (reference_date - start).days if start <= reference_date else 0

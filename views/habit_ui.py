@@ -122,8 +122,8 @@ class HabitManagementUI(BaseUI):
                 habit['description'][:30],
                 habit['importance'],
                 habit['repeat'],
-                habit['start_date'],
-                habit['end_date'],
+                habit['start'],
+                habit['end'],
                 habit['tasks']
             ])
         return habit_id_map

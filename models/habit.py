@@ -8,8 +8,8 @@ class Habit:
                  name: str,
                  category: str,
                  description: str,
-                 start_date: str,
-                 end_date: str,
+                 start: str,
+                 end: str,
                  importance: str,
                  repeat: str,
                  tasks: int,
@@ -21,8 +21,8 @@ class Habit:
         self.name = name
         self.category = category
         self.description = description
-        self.start_date = start_date
-        self.end_date = end_date
+        self.start = start
+        self.end = end
         self.importance = importance
         self.repeat = repeat
         self.tasks = tasks
@@ -54,16 +54,24 @@ class Habit:
             habit_id = db.create_data('habit', data)
             if habit_id == -1:
                 return None
-            return cls.get_by_id(habit_id, db)
+            return cls.get_by_id(habit_id, db_controller=db, **data)
         except Exception as e:
             print("Error creating habit: {}".format(e))
             return None
 
     @classmethod
-    def get_by_id(cls, habit_id: int, db_controller: Optional[DatabaseController] = None) -> Optional['Habit']:
+    def get_by_id(cls, habit_id: int, db_controller: Optional[DatabaseController] = None, **kwargs) -> Optional['Habit']:
         """Get habit by ID"""
         db = db_controller or DatabaseController()
         try:
+            if kwargs:
+                return cls(
+                    habit_id=habit_id,
+                    db_controller=db,
+                    **kwargs
+                )
+            
+            # Normal DB lookup
             habits = db.read_data('habit', {'id': habit_id})
             return cls.from_db_tuple(habits[0]) if habits else None
         except Exception as e:
@@ -89,8 +97,8 @@ class Habit:
             name=db_tuple[1],
             category=db_tuple[2],
             description=db_tuple[3],
-            start_date=db_tuple[5],
-            end_date=db_tuple[6],
+            start=db_tuple[5],
+            end=db_tuple[6],
             importance=db_tuple[7],
             repeat=db_tuple[8],
             tasks=db_tuple[9],
@@ -109,7 +117,7 @@ class Habit:
         if self.importance == 'Paused':
             return 'Paused'
         today = datetime.now().date()
-        end = datetime.strptime(self.end_date, '%Y-%m-%d').date()
+        end = datetime.strptime(self.end, '%Y-%m-%d').date()
         if end < today:
             return 'Completed'
         return 'Active'
@@ -161,8 +169,8 @@ class Habit:
             'name': self.name,
             'category': self.category,
             'description': self.description,
-            'start': self.start_date,
-            'stop': self.end_date,
+            'start': self.start,
+            'stop': self.end,
             'importance': self.importance,
             'repeat': self.repeat,
             'tasks': self.tasks,
@@ -210,7 +218,7 @@ class Habit:
 
     def get_days_passed(self) -> int:
         """Calculate days since start"""
-        start = datetime.strptime(self.start_date, '%Y-%m-%d').date()
+        start = datetime.strptime(self.start, '%Y-%m-%d').date()
         today = datetime.now().date()
         return (today - start).days
 
