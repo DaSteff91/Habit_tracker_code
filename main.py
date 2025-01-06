@@ -1,4 +1,6 @@
-from os import sys
+import os
+import sys
+import subprocess
 from views.menu_ui import MainUI
 from controllers.habit import HabitController
 from controllers.task import TaskController
@@ -6,6 +8,32 @@ from controllers.analytics import AnalyticsController
 from database.connector import DatabaseConnector
 from database.operations import DatabaseController
 
+def launch_new_terminal():
+    """Attempt to launch application in new terminal window"""
+    if os.environ.get('HABIT_TRACKER_RUNNING'):  # Check if already in new terminal
+        return False
+            
+    try:
+        script_path = os.path.abspath(__file__)
+        if os.name == 'posix':  # Linux/Unix
+            os.environ['HABIT_TRACKER_RUNNING'] = '1'  # Set environment flag
+            terminal_commands = [
+                ['gnome-terminal', '--', 'bash', '-c', f'HABIT_TRACKER_RUNNING=1 python3 {script_path}; exec bash'],
+                ['xterm', '-hold', '-e', f'HABIT_TRACKER_RUNNING=1 python3 {script_path}'],
+                ['konsole', '--hold', '--', 'python3', script_path]
+            ]
+            
+            for cmd in terminal_commands:
+                try:
+                    subprocess.run(['which', cmd[0]], check=True, capture_output=True)
+                    subprocess.Popen(cmd)
+                    sys.exit(0)
+                except subprocess.CalledProcessError:
+                    continue
+        return False
+    except Exception as e:
+        print(f"Could not launch new terminal: {e}")
+        return False
 class HabitTracker:
     """Main application class"""
     def __init__(self, db_name: str = "main.db"):
@@ -45,6 +73,9 @@ class HabitTracker:
 
 def main():
     """Application entry point"""
+    if len(sys.argv) == 1:  # Only try on first run
+        if launch_new_terminal():
+            return
     app = HabitTracker()
     app.run()
 
