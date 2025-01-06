@@ -150,7 +150,16 @@ class Habit:
 
     @classmethod
     def from_db_tuple(cls, db_tuple: tuple) -> 'Habit':
-        """Create habit from database tuple"""
+        """
+        Creates a Habit instance from a database tuple.
+        This class method converts a database tuple containing habit information into a Habit object.
+
+        Args:
+            db_tuple (tuple): A tuple containing habit data from the database
+        Returns:
+            Habit: A new Habit instance populated with the database values
+        """
+        
         habit = cls(
             habit_id=db_tuple[0],
             name=db_tuple[1],
@@ -189,7 +198,14 @@ class Habit:
     # Database operations
 
     def save(self) -> bool:
-        """Save to database"""
+        """
+        Save the habit to the database.
+        This method saves or updates a habit in the database. If the habit doesn't have an ID,
+        it creates a new entry. Otherwise, it updates the existing entry.
+        Returns:
+            bool: True if save/update was successful, False if failed
+        """
+        
         try:
             data = self.to_dict()
             if not hasattr(self, 'id'):
@@ -197,11 +213,25 @@ class Habit:
                 return self.id != -1
             return self.db_controller.update_data('habit', self.id, data)
         except Exception as e:
-            print(f"Error saving habit: {e}")
+            print("Error saving habit: {}".format(e))
             return False
 
     def update(self, data: Dict[str, Any]) -> bool:
-        """Update specific fields"""
+        """
+        Updates the habit instance with new data.
+
+        This method updates both the database record and the object's attributes with the 
+        provided data dictionary. The habit must have an id attribute to be updated.
+
+        Args:
+            data (Dict[str, Any]): Dictionary containing the fields to update and their new values.
+                                  Keys should match the habit attributes names.
+
+        Returns:
+            bool: True if update was successful, False if update failed or if habit has no id.
+
+        """
+
         try:
             if not hasattr(self, 'id'):
                 return False
@@ -211,17 +241,27 @@ class Habit:
                 return True
             return False
         except Exception as e:
-            print(f"Error updating habit: {e}")
+            print("Error updating habit: {}".format(e))
             return False
 
     def delete(self) -> bool:
-        """Delete from database"""
+        """
+        Deletes the current habit from the database.
+
+        This method attempts to remove the habit record from the database using the habit's ID.
+        It will only proceed with deletion if the habit instance has an 'id' attribute.
+
+        Returns:
+            bool: True if deletion was successful, False if the habit has no ID or if an error occurs
+                  during deletion.
+        """
+
         try:
             if not hasattr(self, 'id'):
                 return False
             return self.db_controller.delete_data('habit', self.id)
         except Exception as e:
-            print(f"Error deleting habit: {e}")
+            print("Error deleting habit: {}".format(e))
             return False
 
     def to_dict(self) -> Dict[str, Any]:
