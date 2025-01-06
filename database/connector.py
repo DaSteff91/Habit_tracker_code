@@ -12,7 +12,10 @@ class DatabaseConnector:
     def connect(self) -> None:
         """Establish database connection"""
         try:
-            self.connection = sqlite3.connect(self.db_name)
+            self.connection = sqlite3.connect(
+                self.db_name,
+                timeout=10,
+                isolation_level=None)
             self.cursor = self.connection.cursor()
         except sqlite3.Error as e:
             print("Connection error: {}".format(e))
@@ -48,7 +51,7 @@ class DatabaseConnector:
             description TEXT NOT NULL,
             created TEXT NOT NULL,
             start TEXT NOT NULL,
-            stop TEXT,
+            end TEXT,
             importance TEXT NOT NULL,
             repeat TEXT NOT NULL,
             tasks INT NOT NULL,
@@ -82,9 +85,6 @@ class DatabaseConnector:
 
         Returns:
             int: The ID of the last row inserted if successful, -1 if an error occurs.
-
-        Raises:
-            sqlite3.Error: If an error occurs during the insertion process.
         """
         try:
             columns = ', '.join(data.keys())    # Creates a comma-separated string of keys
@@ -135,9 +135,7 @@ class DatabaseConnector:
 
         Returns:
             bool: True if the update was successful, False otherwise.
-
-        Raises:
-            sqlite3.Error: If an error occurs during the update operation.
+            
         """
         try:
             set_clause = ', '.join(["{} = ?".format(k) for k in data.keys()])

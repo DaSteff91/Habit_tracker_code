@@ -9,8 +9,8 @@ class Habit:
                  name: str,
                  category: str,
                  description: str,
-                 start_date: str,
-                 end_date: str,
+                 start: str,
+                 end: str,
                  importance: str,
                  repeat: str,
                  tasks: int,
@@ -22,13 +22,14 @@ class Habit:
         self.name = name
         self.category = category
         self.description = description
-        self.start_date = start_date
-        self.end_date = end_date
+        self.start = start
+        self.end = end
         self.importance = importance
         self.repeat = repeat
         self.tasks = tasks
         self.tasks_description = tasks_description
         self.streak = 0
+        self.longest_streak = 0
         self.reset_count = 0
         self.created = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         self.db_controller = db_controller or DatabaseController()
@@ -47,45 +48,68 @@ class Habit:
         return prepared
 
     @classmethod
-    def create(cls, data: Dict[str, Any]) -> Optional['Habit']:
-        """Create new habit with tasks"""
+    def create(cls, data: Dict[str, Any], db_controller: Optional[DatabaseController] = None) -> Optional['Habit']:
+        """
+        Creates a new Habit object and saves it to the database.
+        Args:
+            data (Dict[str, Any]): Dictionary containing the habit data with the following keys:
+                - name: The name of the habit
+                - description: Description of the habit
+                - periodicity: How often the habit should be performed
+                - Additional fields as defined in the habit schema
+            db_controller (Optional[DatabaseController]): Database controller instance. If None, creates new instance.
+        Returns:
+            Optional[Habit]: The created Habit object if successful, None if creation fails.
+        """
+
         try:
-            data = cls._prepare_data(data)
-            db = DatabaseController()
-            habit_id = db.create_data('habit', data)
+            # Store original data for object creation
+            init_data = data.copy()
+            
+            # Prepare data for database
+            db_data = cls._prepare_data(data)
+            db = db_controller or DatabaseController()
+            
+            # Create in database
+            habit_id = db.create_data('habit', db_data)
             if habit_id == -1:
                 return None
-                
-            # Create tasks right after habit creation
-            if not Task.create_series(habit_id, data):
-                db.delete_data('habit', habit_id)
-                return None
-                
-            return cls.get_by_id(habit_id)
+              
+            # Create object with original data
+            return cls.get_by_id(habit_id, db_controller=db, **init_data)
+
         except Exception as e:
             print("Error creating habit: {}".format(e))
             return None
 
     @classmethod
-    def get_by_id(cls, habit_id: int) -> Optional['Habit']:
+    def get_by_id(cls, habit_id: int, db_controller: Optional[DatabaseController] = None, **kwargs) -> Optional['Habit']:
         """Get habit by ID"""
-        db = DatabaseController()
+        db = db_controller or DatabaseController()
         try:
+            if kwargs:
+                return cls(
+                    habit_id=habit_id,
+                    db_controller=db,
+                    **kwargs
+                )
+            
+            # Normal DB lookup
             habits = db.read_data('habit', {'id': habit_id})
             return cls.from_db_tuple(habits[0]) if habits else None
         except Exception as e:
-            print(f"Error getting habit: {e}")
+            print("Error getting habit: {}".format(e))
             return None
 
     @classmethod
-    def get_all(cls) -> List['Habit']:
+    def get_all(cls, db_controller: Optional[DatabaseController] = None) -> List['Habit']:
         """Get all habits"""
-        db = DatabaseController()
+        db = db_controller or DatabaseController()
         try:
             habits = db.read_data('habit')
             return [cls.from_db_tuple(habit) for habit in habits]
         except Exception as e:
-            print(f"Error getting habits: {e}")
+            print("Error getting habits: {}".format(e))
             return []
 
     @classmethod
@@ -96,8 +120,8 @@ class Habit:
             name=db_tuple[1],
             category=db_tuple[2],
             description=db_tuple[3],
-            start_date=db_tuple[5],
-            end_date=db_tuple[6],
+            start=db_tuple[5],
+            end=db_tuple[6],
             importance=db_tuple[7],
             repeat=db_tuple[8],
             tasks=db_tuple[9],
@@ -110,13 +134,14 @@ class Habit:
         return habit
 
     # Properties and status
+
     @property
     def status(self) -> str:
         """Get current status"""
         if self.importance == 'Paused':
             return 'Paused'
         today = datetime.now().date()
-        end = datetime.strptime(self.end_date, '%Y-%m-%d').date()
+        end = datetime.strptime(self.end, '%Y-%m-%d').date()
         if end < today:
             return 'Completed'
         return 'Active'
@@ -126,6 +151,7 @@ class Habit:
         return self.status == 'Active'
 
     # Database operations
+
     def save(self) -> bool:
         """Save to database"""
         try:
@@ -168,8 +194,8 @@ class Habit:
             'name': self.name,
             'category': self.category,
             'description': self.description,
-            'start': self.start_date,
-            'stop': self.end_date,
+            'start': self.start,
+            'end': self.end,
             'importance': self.importance,
             'repeat': self.repeat,
             'tasks': self.tasks,
@@ -180,20 +206,30 @@ class Habit:
         }
 
     # Business logic
+    
     def increment_streak(self) -> bool:
-        """Increment streak and update longest streak if needed"""
+        """Increment streak"""
         try:
             self.streak += 1
-            update_data = {'streak': self.streak}
-            
-            # Update longest streak if current streak is higher
-            if self.streak > self.longest_streak:
-                self.longest_streak = self.streak
-                update_data['longest_streak'] = self.longest_streak
-                
-            return self.update(update_data)
+            success = self.update({'streak': self.streak})
+            if success:
+                return self.update_longest_streak()
+            return False
         except Exception as e:
             print("Error updating streak: {}".format(e))
+            return False
+
+    def update_longest_streak(self) -> bool:
+        """Update longest streak if current is higher"""
+        try:
+            if not hasattr(self, 'longest_streak'):
+                self.longest_streak = 0
+            if self.streak > self.longest_streak:
+                self.longest_streak = self.streak
+                return self.update({'longest_streak': self.longest_streak})
+            return True
+        except Exception as e:
+            print("Error updating longest streak: {}".format(e))
             return False
         
     def reset_streak(self) -> bool:
@@ -217,7 +253,7 @@ class Habit:
 
     def get_days_passed(self) -> int:
         """Calculate days since start"""
-        start = datetime.strptime(self.start_date, '%Y-%m-%d').date()
+        start = datetime.strptime(self.start, '%Y-%m-%d').date()
         today = datetime.now().date()
         return (today - start).days
 

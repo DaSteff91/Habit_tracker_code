@@ -87,10 +87,11 @@ class Task:
     # Business logic
 
     @staticmethod
-    def get_tasks_for_habit(habit_id: int, due_date: str) -> List['Task']:
+    def get_tasks_for_habit(habit_id: int, due_date: str, 
+                       db_controller: Optional[DatabaseController] = None) -> List['Task']:
         """Get all tasks for a habit on specific date"""
         try:
-            db = DatabaseController()
+            db = db_controller or DatabaseController()
             tasks = db.read_data(
                 'task',
                 {
@@ -106,9 +107,9 @@ class Task:
     # Class methods for task creation
 
     @classmethod
-    def delete_for_habit(cls, habit_id: int) -> bool:
+    def delete_for_habit(cls, habit_id: int, db_controller: Optional[DatabaseController] = None) -> bool:
         """Delete all tasks for a habit"""
-        db = DatabaseController()
+        db = db_controller or DatabaseController()
         try:
             return db.delete_data('task', {'habit_id': habit_id})
         except Exception as e:
@@ -130,7 +131,7 @@ class Task:
             # Convert string to datetime for comparison
             next_due_dt = datetime.strptime(next_due, '%Y-%m-%d')
             
-            if cls._is_past_end_date(next_due_dt, habit[6]):  # habit[6] is stop_date
+            if cls._is_past_end_date(next_due_dt, habit[6]):  # habit[6] is end date
                 print("Habit {} completed - end date reached".format(habit_id))
                 return False
                 
@@ -141,9 +142,9 @@ class Task:
             return False
 
     @classmethod
-    def _get_habit_data(cls, habit_id: int) -> Optional[tuple]:
+    def _get_habit_data(cls, habit_id: int, db_controller: Optional[DatabaseController] = None) -> Optional[tuple]:
         """Get habit data from database"""
-        db = DatabaseController()
+        db = db_controller or DatabaseController()
         habits = db.read_data('habit', {'id': habit_id})
         return habits[0] if habits else None
 
@@ -172,11 +173,11 @@ class Task:
             return False
 
     @classmethod
-    def get_by_id(cls, task_id: int) -> Optional['Task']:
+    def get_by_id(cls, task_id: int, db_controller: Optional[DatabaseController] = None) -> Optional['Task']:
         """Get task by ID"""
-        db_controller = DatabaseController()
+        db = db_controller or DatabaseController()
         try:
-            task_data = db_controller.read_data('task', {'id': task_id})
+            task_data = db.read_data('task', {'id': task_id})
             if not task_data:
                 return None
             return cls.from_db_tuple(task_data[0])
@@ -185,14 +186,15 @@ class Task:
             return None
  
     @classmethod
-    def create_from_habit(cls, habit_id: int, task_number: int, habit_data: Dict[str, Any]) -> Optional['Task']:
+    def create_from_habit(cls, habit_id: int, task_number: int, habit_data: Dict[str, Any], db_controller: Optional[DatabaseController] = None) -> Optional['Task']:
         """Create task from habit data"""
         try:
             task = cls(
                 habit_id=habit_id,
                 task_number=task_number,
                 task_description=habit_data['tasks_description'],
-                due_date=habit_data['start']
+                due_date=habit_data['start'],
+                db_controller = db_controller # Passes through the parameter. Inserted for testing purposes
             )
             task_id = task.save()
             if task_id:
@@ -200,28 +202,13 @@ class Task:
                 return task
             return None
         except Exception as e:
-            print(f"Error creating task from habit: {e}")
+            print("Error creating task from habit: {}".format(e))
             return None
-        
+           
     @classmethod
-    def create_pending_tasks(cls, tasks_data: List[tuple], 
-                           habits_data: List[tuple],
-                           db_controller: DatabaseController) -> List['Task']:
-        """Create task instances from raw data"""
-        pending_tasks = []
-        for task in tasks_data:
-            task_obj = cls.from_db_tuple(task, db_controller)
-            habit = next((h for h in habits_data if h[0] == task[1]), None)
-            if habit and habit[7] != 'Paused':
-                task_obj.set_habit_data(habit[1], habit[11])
-                task_obj.completion_rate = task_obj.calculate_completion_rate()
-                pending_tasks.append(task_obj)
-        return pending_tasks
-    
-    @classmethod
-    def get_pending(cls) -> List['Task']:
+    def get_pending(cls, db_controller: Optional[DatabaseController] = None) -> List['Task']:
         """Get all pending tasks"""
-        db = DatabaseController()
+        db = db_controller or DatabaseController()
         try:
             today = datetime.now().strftime('%Y-%m-%d')
             tasks = db.read_data('task', {'status': 'pending'})

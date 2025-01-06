@@ -1,13 +1,23 @@
 from datetime import datetime
 from typing import Dict, Any, Tuple, Optional
 from models.habit import Habit
+from database.operations import DatabaseController # just pass through in update_task_status
 
 class HabitValidator:
     """Validates habit-related data"""
 
     @staticmethod
     def validate_update(field: str, value: str, habit_id: int) -> bool: 
-        """Validate single field update"""
+        """Validate a single field update for a habit.
+
+        Args:
+            field (str): Name of the field to update
+            value (str): New value for the field
+            habit_id (int): ID of the habit to update
+
+        Returns:
+            bool: True if update is valid, False otherwise
+        """
         try:
             habit = Habit.get_by_id(habit_id)
             if not habit:
@@ -25,11 +35,21 @@ class HabitValidator:
 
     @staticmethod
     def validate_habit_data(data: Dict[str, Any], updating_field: Optional[str] = None) -> Tuple[bool, str]:
-        """Validate habit input data"""
+        """Validate habit data against business rules.
+
+        Args:
+            data (Dict[str, Any]): Habit data to validate containing required fields
+            updating_field (Optional[str]): Field being updated, if any
+
+        Returns:
+            Tuple[bool, str]: (is_valid, message)
+                - is_valid: True if data is valid
+                - message: Validation message or error description
+        """
         try:
             # Required fields check
             required_fields = [
-                'name', 'category', 'description', 'start', 'stop',
+                'name', 'category', 'description', 'start', 'end',
                 'importance', 'repeat', 'tasks', 'tasks_description'
             ]
             for field in required_fields:
@@ -43,7 +63,7 @@ class HabitValidator:
                 return False, "Maximum 10 tasks allowed per habit"
                 
             # Date validations
-            date_fields = ['start', 'stop']
+            date_fields = ['start', 'end']
             dates = {}
             for field in date_fields:
                 try:
@@ -51,8 +71,8 @@ class HabitValidator:
                 except ValueError:
                     return False, f"Invalid date format for {field}: Use YYYY-MM-DD"
             
-            if dates['start'] >= dates['stop']:
-                return False, "Start date must be before stop date"
+            if dates['start'] >= dates['end']:
+                return False, "Start date must be before end date"
                 
             if updating_field == 'start' and dates['start'].date() < datetime.now().date():
                 return False, "Start date cannot be in the past"
@@ -89,7 +109,21 @@ class TaskValidator:
     
     @staticmethod
     def validate_task_data(data: Dict[str, Any]) -> Tuple[bool, str]:
-        """Validate task input data"""
+        """Validate task input data for a habit tracking system.
+        This function checks if the provided task data meets all required criteria including
+        presence of required fields, data type validations, and content restrictions.
+        Args:
+            data (Dict[str, Any]): A dictionary containing task data with the following keys:
+                - habit_id: Identifier for the associated habit
+                - task_number: Positive integer representing task sequence
+                - task_description: String describing the task (1-50 characters)
+                - due_date: Date string in 'YYYY-MM-DD' format
+                - status: String ('pending', 'done', or 'ignore')
+        Returns:
+            Tuple[bool, str]: A tuple containing:
+                - bool: True if validation passes, False otherwise
+                - str: Success message if valid, error message if invalid
+        """
         try:
             required_fields = [
                 'habit_id', 'task_number', 'task_description',
@@ -128,24 +162,5 @@ class TaskValidator:
     @staticmethod
     def validate_status(status: str) -> bool:
         """Validate task status"""
-        return status in ['done', 'ignore', 'pause habit']
+        return status in ['pending', 'done', 'ignore'] 
     
-    @staticmethod
-    def validate_date(date_str: str) -> bool:
-            # Does the task really need a validation for the date??
-        """Validate date format"""
-        try:
-            datetime.strptime(date_str, '%Y-%m-%d')
-            return True
-        except ValueError:
-            return False
-
-    # @staticmethod
-    # def validate_date_format(date_str: str) -> bool:
-    #         # Does the task really need a validation for the date??
-    #     """Validate date format"""
-    #     try:
-    #         datetime.strptime(date_str, '%Y-%m-%d')
-    #         return True
-    #     except ValueError:
-    #         return False
