@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Dict, Any, Tuple, Optional
 from models.habit import Habit
+from database.operations import DatabaseController # just pass through in update_task_status
 
 class HabitValidator:
     """Validates habit-related data"""
@@ -128,7 +129,7 @@ class TaskValidator:
     @staticmethod
     def validate_status(status: str) -> bool:
         """Validate task status"""
-        return status in ['done', 'ignore', 'pause habit']
+        return status in ['pending', 'done', 'ignore'] 
     
     @staticmethod
     def validate_date(date_str: str) -> bool:
