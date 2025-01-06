@@ -23,10 +23,13 @@ class BaseUI:
     def clear_screen(self):
         """Clear terminal screen and reset cursor position"""
         try:
-            # Clear screen and reset cursor for Linux/Mac
-            os.system('clear && tput cup 0 0')
+            # Check OS and use appropriate command
+            if os.name == 'nt':  # Windows
+                os.system('cls')
+            else:  # Unix/Linux/MacOS
+                os.system('clear')
         except Exception as e:
-            # Fallback if clear fails
+            # Fallback: Print newlines
             print('\n' * 100)
             print("Error clearing screen: {}".format(e))
 
