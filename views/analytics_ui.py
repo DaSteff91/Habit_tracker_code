@@ -35,7 +35,7 @@ class AnalyticsUI(BaseUI):
         super().__init__()
         self.analytics_controller = analytics_controller or AnalyticsController()
         self.current_sort = {'field': None, 'ascending': True}
-        self.items_per_page = 15
+        self.items_per_page = self.DEFAULT_ITEMS_PER_PAGE
 
     def display_paginated_analytics(self, habits: List[Dict], page: int, items_per_page: int) -> None:
         """Display paginated analytics table"""

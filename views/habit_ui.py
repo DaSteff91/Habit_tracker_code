@@ -33,6 +33,7 @@ class HabitManagementUI(BaseUI):
     DEFAULT_WIDTH = 15
     ITEMS_PER_PAGE = 15
     
+    # Initialization
     def __init__(self, habit_controller=None):
         """Initialize UI with controllers and configuration"""
         super().__init__()
@@ -40,7 +41,7 @@ class HabitManagementUI(BaseUI):
         self.validator = HabitValidator()
         self.items_per_page = self.ITEMS_PER_PAGE
 
-    # Core UI Methods
+    # Main Menu Flow
     def show_habit_management(self):
         """Main habit management menu controller"""
         page = 1
@@ -92,7 +93,18 @@ class HabitManagementUI(BaseUI):
 
     # Display Methods
     def display_habits_table(self, habits: List[Dict], page: int = None) -> Tuple[Dict[int, int], List[Dict]]:
-        """Display habits table with pagination"""
+        """Displays the habits in a formatted table view.
+        This method creates and displays a table containing habit information using the prettytable library.
+        It maps internal row numbers to actual habit IDs and handles pagination if enabled.
+        Args:
+            habits (List[Dict]): List of habit dictionaries containing habit information
+            page (int, optional): Page number for pagination. Defaults to None.
+        Returns:
+            Tuple[Dict[int, int], List[Dict]]: A tuple containing:
+                - Dictionary mapping display row numbers to actual habit IDs
+                - List of habits displayed in the table
+        """
+
         if not habits:
             print("\nNo habits found")
             return {}, []
