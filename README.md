@@ -71,6 +71,31 @@ python main.py
 - Check progress in Analytics
 - Get details in the provided help.txt file
 
+## Menu Overview
+
+Habit Tracker Main Menu
+│
+├── Task Overview
+│   ├── Mark tasks as done
+│   ├── Mark tasks as ignored
+│   ├── Pause habit
+│   └── Back to Main Menu
+│
+├── Habit Management
+│   ├── Create New Habit
+│   ├── Update Habit
+│   ├── Delete Habit
+│   └── Back to Main Menu
+│
+├── Analytics
+│   ├── Filter Habits
+│   ├── Reset View
+│   ├── Previous/Next Page
+│   └── Back to Main Menu
+│
+├── Help
+└── Exit
+
 ## Requirements
 
 - Python 3.12+
