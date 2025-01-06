@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS habit (
                 description TEXT NOT NULL,
                 created TEXT NOT NULL,
                 start TEXT NOT NULL,
-                stop TEXT,
+                end TEXT,
                 importance TEXT NOT NULL,
                 repeat TEXT NOT NULL,
                 tasks INT NOT NULL,
