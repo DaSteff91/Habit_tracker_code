@@ -63,17 +63,6 @@ class TaskController:
         except Exception as e:
             print("Error getting pending tasks: {}".format(e))
             return []
-    
-    def get_related_tasks(self, task_id: int) -> List[int]:
-        """Get tasks with same habit/date"""
-        try:
-            task = Task.get_by_id(task_id)
-            if task:
-                return Task.get_tasks_for_habit(task.habit_id, task.due_date)
-            return []
-        except Exception as e:
-            print("Error getting related tasks: {}".format(e))
-            return []
                     
     def update_task_status(self, task_id: int, new_status: str) -> bool:
         """
