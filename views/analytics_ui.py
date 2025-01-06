@@ -6,6 +6,31 @@ from controllers.analytics import AnalyticsController
 
 class AnalyticsUI(BaseUI):
     """Analytics specific UI"""
+
+    # Table configuration
+    TABLE_HEADERS = [
+        'Name', 'Category', 'Description',
+        'Current Streak', 'Longest Streak', 
+        'Days Passed', 'Success Rate',
+        'Reset Count', 'Repeat', 'Importance'
+    ]
+    
+    COLUMN_WIDTHS = {
+        'Name': 20,
+        'Category': 15,
+        'Description': 50,
+        'Current Streak': 12,
+        'Longest Streak': 12,
+        'Days Passed': 12,
+        'Success Rate': 12,
+        'Reset Count': 12,
+        'Repeat': 8,
+        'Importance': 10
+    }
+    
+    DEFAULT_WIDTH = 15
+    DEFAULT_ITEMS_PER_PAGE = 10
+
     def __init__(self, analytics_controller=None):
         super().__init__()
         self.analytics_controller = analytics_controller or AnalyticsController()
@@ -24,41 +49,17 @@ class AnalyticsUI(BaseUI):
         self._display_table(table)
 
     def _initialize_table(self) -> PrettyTable:
-        """Initialize table with headers"""
+        """Create and configure table"""
         table = PrettyTable()
-        table.field_names = [
-            'Name', 
-            'Category', 
-            'Description',
-            'Current Streak',
-            'Longest Streak', 
-            'Days Passed',
-            'Success Rate',
-            'Reset Count',
-            'Repeat',
-            'Importance'
-        ]
+        table.field_names = self.TABLE_HEADERS
         table.align = "l"
         table.hrules = 1
         return table
 
     def _configure_columns(self, table: PrettyTable) -> None:
         """Configure column widths"""
-        max_widths = {
-            'Name': 20,
-            'Category': 15,
-            'Description': 50,
-            'Current Streak': 12,
-            'Longest Streak': 12,
-            'Days Passed': 12,
-            'Success Rate': 12,
-            'Reset Count': 12,
-            'Repeat': 8,
-            'Importance': 10
-        }
-        
         for header in table.field_names:
-            table._max_width[header] = max_widths.get(header, 15)
+            table._max_width[header] = self.COLUMN_WIDTHS.get(header, self.DEFAULT_WIDTH)
 
     def _add_habit_rows(self, table: PrettyTable, habits: List[Dict], page: int, items_per_page: int) -> None:
         """Add habit rows with pagination"""
@@ -86,7 +87,24 @@ class AnalyticsUI(BaseUI):
         print(table)
 
     def show_analytics_menu(self):
-        """Main analytics menu controller"""
+        """
+        This method provides a paginated interface for viewing habit analytics,
+        with options to filter, sort, and navigate through multiple pages of habits.
+        Returns:
+            None
+        Features:
+            - Paginated display of habits (15 items per page)
+            - Filtering habits based on user criteria
+            - Sorting habits by different fields
+            - Navigation between pages
+            - Option to reset view to original state
+            - Return to main menu
+        Notes:
+            - If no habits are found, displays appropriate message and returns to main menu
+            - Pagination controls (Previous/Next) appear dynamically based on current page
+            - Current page and total pages are displayed for user reference
+        """
+
         page = 1
         ITEMS_PER_PAGE = 15
         habits = self.get_habits_data()
@@ -139,7 +157,20 @@ class AnalyticsUI(BaseUI):
         return (len(habits) + items_per_page - 1) // items_per_page
     
     def handle_sort_habits(self, data: List[Dict]) -> List[Dict]:
-        """Handle habit sorting workflow"""
+        """
+        This method prompts the user to select a field to sort by and the sort order,
+        then returns the sorted data accordingly.
+        Args:
+            data (List[Dict]): List of dictionaries containing habit data to be sorted
+        Returns:
+            List[Dict]: The sorted list of habit dictionaries if sort options were selected,
+                       or the original data if sorting was cancelled
+        Note:
+            The sort field is stored in self.current_sort as a dictionary containing:
+            - 'field': The selected sort field (lowercase with spaces replaced by underscores)
+            - 'ascending': Boolean indicating if sort order is ascending
+        """
+
         sort_by = questionary.select(
             "Sort by:",
             choices=self.get_sortable_fields() + ["Cancel"],
@@ -172,7 +203,19 @@ class AnalyticsUI(BaseUI):
         return data
 
     def handle_filter_habits(self, data: List[Dict]) -> List[Dict]:
-        """Handle habit filtering workflow"""
+        """
+        Handles the filtering of habits based on user selection.
+        This method provides an interactive interface for users to filter habit data by selecting
+        a field and a corresponding value. Users can also reset filters or cancel the operation.
+        Args:
+            data (List[Dict]): A list of dictionaries containing habit data to be filtered.
+        Returns:
+            List[Dict]: Filtered habit data based on user selection. Returns original data if:
+                - User cancels the operation
+                - No field is selected
+                - Filter is reset
+        """
+
         field = questionary.select(
             "Select field to filter by:",
             choices=self.get_filterable_fields() + ["Cancel"],
