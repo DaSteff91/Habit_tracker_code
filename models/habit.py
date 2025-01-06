@@ -1,8 +1,6 @@
 from typing import Dict, Any, Optional, List, Tuple
 from datetime import datetime
 from database.operations import DatabaseController
-from models.task import Task
-
 class Habit:
     """Habit data model with database operations and business logic"""
     def __init__(self, 
@@ -39,14 +37,16 @@ class Habit:
     @staticmethod
     def _prepare_data(data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Prepares the habit data by adding default values for tracking.  
-        This method creates a copy of the input data dictionary and adds initialization values  
-        for habit tracking including creation timestamp, initial streak count, and streak reset counter.  
-        Args:  
-            data (Dict[str, Any]): Original habit data dictionary to be prepared  
-        Returns:  
-            Dict[str, Any]: Prepared data dictionary with added tracking fields
+        Prepares habit data for storage by adding required fields.
+        Args:
+            data (Dict[str, Any]): Dictionary containing the habit data to be prepared
+        Returns:
+            Dict[str, Any]: A new dictionary with the original data plus additional fields:
+                - created: Current timestamp in 'YYYY-MM-DD HH:MM:SS' format
+                - streak: Initial streak count set to 0 
+                - streak_reset_count: Initial reset count set to 0
         """
+
         
         prepared = data.copy()
         prepared.update({
