@@ -85,9 +85,6 @@ class DatabaseConnector:
 
         Returns:
             int: The ID of the last row inserted if successful, -1 if an error occurs.
-
-        Raises:
-            sqlite3.Error: If an error occurs during the insertion process.
         """
         try:
             columns = ', '.join(data.keys())    # Creates a comma-separated string of keys
@@ -138,9 +135,7 @@ class DatabaseConnector:
 
         Returns:
             bool: True if the update was successful, False otherwise.
-
-        Raises:
-            sqlite3.Error: If an error occurs during the update operation.
+            
         """
         try:
             set_clause = ', '.join(["{} = ?".format(k) for k in data.keys()])

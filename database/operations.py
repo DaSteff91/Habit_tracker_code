@@ -50,14 +50,34 @@ class DatabaseController:
             return -1
 
     def _validate_table(self, table: str) -> bool:
-        """Validate table name"""
+        """
+        Validates if the provided table name is valid within the database schema.
+        Args:
+            table (str): Name of the table to validate.
+        Returns:
+            bool: True if table name is valid ('habit' or 'task'), False otherwise.
+        """
+        
         if table not in ['habit', 'task']:
             print("Invalid table: {}".format(table))
             return False
         return True
 
     def _get_duplicate_conditions(self, table: str, data: Dict[str, Any]) -> Optional[Dict]:
-        """Get conditions for duplicate checking"""
+        """
+        Determines the conditions for checking duplicate entries in the database based on the table and data provided.
+
+        Args:
+            table (str): The name of the database table ('habit' or 'task').
+            data (Dict[str, Any]): Dictionary containing the data fields to check for duplicates.
+
+        Returns:
+            Optional[Dict]: A dictionary containing the fields and values to check for duplicates.
+                           For 'habit' table, returns name and description.
+                           For 'task' table, returns task_description, habit_id, task_number and due_date.
+                           Returns None if required fields are missing or table is not recognized.
+        """
+
         try:
             if table == 'habit':
                 return {
@@ -76,7 +96,19 @@ class DatabaseController:
         return None
 
     def _check_duplicates(self, db: Database, table: str, conditions: Dict) -> bool:
-        """Check for duplicate entries"""
+        """
+        Check if a record with given conditions already exists in the specified table.
+
+        Args:
+            db (Database): Database instance to check against
+            table (str): Name of the table to check in
+            conditions (Dict): Dictionary containing column-value pairs to check for duplicates
+
+        Returns:
+            bool: True if duplicate exists, False otherwise
+
+        """
+
         existing = db.read_data(table, conditions)
         if existing:
             print("Error: {} already exists!".format(table.capitalize()))
