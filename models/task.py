@@ -89,7 +89,19 @@ class Task:
     
     @classmethod
     def get_by_id(cls, task_id: int, db_controller: Optional[DatabaseController] = None) -> Optional['Task']:
-        """Get task by ID"""
+        """
+        Retrieve a task by its ID from the database.
+
+        Args:
+            task_id (int): The ID of the task to retrieve.
+            db_controller (Optional[DatabaseController]): Database controller instance. 
+                If None, a new controller will be created.
+
+        Returns:
+            Optional[Task]: The task object if found, None otherwise.
+
+        """
+
         db = db_controller or DatabaseController()
         try:
             task_data = db.read_data('task', {'id': task_id})
@@ -102,7 +114,19 @@ class Task:
     
     @classmethod
     def from_db_tuple(cls, db_tuple: tuple) -> 'Task':
-        """Create task from database tuple"""
+        """
+        Creates a Task object from a database tuple.
+
+        Args:
+            cls: The class reference
+            db_tuple (tuple): A tuple containing task data from database with the following structure:
+                (task_id, habit_id, task_number, task_description, created, due_date, status)
+
+        Returns:
+            Task: A new Task instance populated with the database values
+
+        """
+
         return cls(
             task_id=db_tuple[0],
             habit_id=db_tuple[1],
@@ -115,7 +139,22 @@ class Task:
     
     @classmethod
     def get_pending(cls, db_controller: Optional[DatabaseController] = None) -> List['Task']:
-        """Get all pending tasks"""
+        """
+        Retrieves all pending tasks that are due today or earlier from the database.
+        This method queries the database for tasks with 'pending' status and filters them based on
+        their due date. It also fetches associated habit information for each task.
+        Args:
+            db_controller (DatabaseController, optional): Database controller instance.
+                If not provided, a new instance will be created.
+        Returns:
+            List[Task]: A list of Task objects that are pending and due today or earlier.
+                Returns an empty list if an error occurs during the database operation.
+        Notes:
+            - Tasks are considered pending only if their associated habit is not in 'Paused' state
+            - Each returned Task object includes the associated habit name and current streak
+            - Due date comparison is done using 'YYYY-MM-DD' format
+        """
+
         db = db_controller or DatabaseController()
         try:
             today = datetime.now().strftime('%Y-%m-%d')
@@ -142,7 +181,23 @@ class Task:
  
     @classmethod
     def create_from_habit(cls, habit_id: int, task_number: int, habit_data: Dict[str, Any], db_controller: Optional[DatabaseController] = None) -> Optional['Task']:
-        """Create task from habit data"""
+        """
+        Creates a new Task instance from a habit's data when creating a new one.
+
+        Args:
+            habit_id (int): The ID of the habit this task belongs to
+            task_number (int): The sequence number of this task within the habit
+            habit_data (Dict[str, Any]): Dictionary containing habit data with keys:
+                - 'tasks_description': Description of the task
+                - 'start': Due date for the task
+            db_controller (Optional[DatabaseController]): Database controller instance for database operations. 
+                                                        Defaults to None.
+
+        Returns:
+            Optional[Task]: New Task instance if creation successful, None if creation fails
+
+        """
+
         try:
             task = cls(
                 habit_id=habit_id,
@@ -162,7 +217,20 @@ class Task:
 
     @classmethod
     def create_next_series(cls, habit_id: int, due_date: str, tasks: List['Task']) -> bool:
-        """Create next series of tasks based on completed ones"""
+        """
+        Creates the next series of tasks for a given habit based on its periodicity.
+        Args:
+            habit_id (int): The ID of the habit to create next series for.
+            due_date (str): The current due date in 'YYYY-MM-DD' format.
+            tasks (List['Task']): List of existing tasks for the habit.
+        Returns:
+            bool: True if next series was created successfully, False otherwise.
+        This method:
+        - Retrieves habit data using the habit ID
+        - Checks if next due date exceeds habit end date
+        - Creates new task series if all checks pass
+        """
+
         try:
             habit = cls._get_habit_data(habit_id)
             if not habit:
@@ -187,7 +255,24 @@ class Task:
 
     @classmethod
     def _create_task_series(cls, habit_id: int, next_due: datetime, habit: tuple) -> bool:
-        """Create new series of tasks after handling the previous one"""
+        """
+        Creates a series of tasks for a habit with specified parameters.
+
+        This method generates multiple task instances based on the habit's task count,
+        storing them in the database with sequential task numbers.
+
+        Args:
+            habit_id (int): The ID of the habit to create tasks for
+            next_due (datetime): The due date for the tasks
+            habit (tuple): A tuple containing habit information where:
+                - habit[9]: Number of tasks to create (tasks_count)
+                - habit[10]: Description for all tasks (tasks_description)
+
+        Returns:
+            bool: True if all tasks were created successfully, False otherwise
+
+        """
+
         try:
             for task_num in range(1, habit[9] + 1):  # habit[9] is tasks_count
                 task = cls(
@@ -204,9 +289,22 @@ class Task:
             return False
 
     @staticmethod
-    def get_tasks_for_habit(habit_id: int, due_date: str, 
-                       db_controller: Optional[DatabaseController] = None) -> List['Task']:
-        """Get all tasks for a habit on specific date"""
+    def get_tasks_for_habit(habit_id: int, due_date: str, db_controller: Optional[DatabaseController] = None) -> List['Task']:
+        """
+        Retrieves tasks associated with a specific habit and due date from the database.
+
+        Args:
+            habit_id (int): The ID of the habit to retrieve tasks for.
+            due_date (str): The due date for the tasks in string format.
+            db_controller (Optional[DatabaseController]): Database controller instance. 
+                If not provided, a new instance will be created.
+
+        Returns:
+            List[Task]: A list of Task objects matching the habit_id and due_date.
+                Returns an empty list if an error occurs during database operation.
+
+        """
+
         try:
             db = db_controller or DatabaseController()
             tasks = db.read_data(
@@ -223,7 +321,19 @@ class Task:
 
     @classmethod
     def create_series(cls, habit_id: int, habit_data: Dict[str, Any]) -> List[int]:
-        """Create a series of initial tasks for a habit"""
+        """
+        Creates a series of tasks for a given habit.
+        Args:
+            habit_id (int): The ID of the habit to create tasks for.
+            habit_data (Dict[str, Any]): Dictionary containing task creation data with keys:
+                - 'tasks': Number of tasks to create
+                - 'tasks_description': Description for each task
+                - 'start': Start date for the tasks
+        Returns:
+            List[int]: List of created task IDs. Returns empty list if creation fails.
+
+        """
+
         task_ids = []
         
         try:
@@ -246,7 +356,18 @@ class Task:
 
     @classmethod
     def delete_for_habit(cls, habit_id: int, db_controller: Optional[DatabaseController] = None) -> bool:
-        """Delete all tasks for a habit"""
+        """
+        Deletes all tasks associated with a specific habit from the database.
+
+        Args:
+            habit_id (int): The ID of the habit whose tasks should be deleted.
+            db_controller (Optional[DatabaseController]): Database controller instance. If None, a new one will be created.
+
+        Returns:
+            bool: True if deletion was successful, False otherwise.
+
+        """
+
         db = db_controller or DatabaseController()
         try:
             return db.delete_data('task', {'habit_id': habit_id})
@@ -262,7 +383,7 @@ class Task:
         return all_done, all_handled
 
     # Helper methods
-
+ 
     @classmethod
     def _get_habit_data(cls, habit_id: int, db_controller: Optional[DatabaseController] = None) -> Optional[tuple]:
         """Get habit data from database"""
@@ -270,7 +391,7 @@ class Task:
         habits = db.read_data('habit', {'id': habit_id})
         return habits[0] if habits else None
 
-    @classmethod
+    @staticmethod
     def _is_past_end_date(cls, next_due: datetime, end_date: str) -> bool:
         """Check if next due date is past habit end date"""
         end = datetime.strptime(end_date, '%Y-%m-%d')
