@@ -13,14 +13,14 @@ This habit tracker helps users:
 ## Features
 
 - **Habit Management**
-  - Create habits with multiple tasks
+  - Create habits with multiple tasks for tracking
   - Set importance levels and repeat intervals
-  - Update habit details
-  - Delete habits and associated tasks
+  - Categorization for fine tuning
+  - Updating and deleting always possible
 
 - **Task Tracking**
   - Mark tasks as done/ignored
-  - Handle related tasks together
+  - Multi-selection
   - Pause habits temporarily
   - Track streaks automatically
 
@@ -29,15 +29,30 @@ This habit tracker helps users:
   - Track longest streaks
   - Filter and sort habits
   - Monitor progress over time
+  - Filter and sort as you please
 
 ## Preparation and Installation
 
+(It is assumed you already have git functionality available - otherwise [get git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) for your operating system before continuing)
+
 1. Clone the repository using git
 
-2. Create a virtual environment (recommended) 
+```Bash
+git clone [https://github.com/DaSteff91/Habit_tracker_code]
+```
+
+2. Optional: Create a virtual environment in the folder you will use the app
+
+```Bash
+python -m venv .venv
+source .venv/bin/activate
+```
 
 3. Install dependencies from the requirement.txt
 
+```Bash
+pip install -r requirements.txt
+```
 ## Usage
 
 1. Start the application using
@@ -45,7 +60,7 @@ This habit tracker helps users:
 python main.py
 ```
 
-2. Navigation
+2. Navigation in the menu
 - Arrow keys (↑↓) for menu selection
 - Enter to confirm
 - Space for multiple selection
@@ -54,8 +69,10 @@ python main.py
 - Create habits in Habit Management
 - Track tasks in Task Overview
 - Check progress in Analytics
+- Get details in the provided help.txt file
 
 ## Requirements
+
 - Python 3.12+
 - SQLite3
 - Dependencies in requirements.txt:
@@ -63,7 +80,7 @@ python main.py
     - rich
     - questionary
 
-## Projet Structure
+## Code Structure
 
 ```Bash
 habit-tracker/
@@ -81,10 +98,10 @@ habit-tracker/
 └── README.md
 ```
 
-## Project and Code Structure
+## Project Structure
 
-Following the model-view-controll pattern and a seperation of concern approach using
-- models: Database operations and business logic
+Following the model-view-controller pattern and a seperation of concern approach using
+- models: Database access layer and business logic
 - views: Taking care of the user interface
 - controllers: Maintaining interactions between models and views
 - database: Ensuring data is stored in a defined manner
@@ -92,6 +109,7 @@ Following the model-view-controll pattern and a seperation of concern approach u
 - tests: Test suite for key functionalities
 
 ## Database
+
 SQLite database (main.db):
 
 - habit table: habit definitions
@@ -104,3 +122,5 @@ Run test suite:
 python -m pytest tests/
 ```
 ## License
+
+MIT License - See LICENSE for details
