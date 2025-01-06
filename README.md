@@ -73,6 +73,7 @@ python main.py
 
 ## Menu Overview
 
+```Bash
 Habit Tracker Main Menu
 │
 ├── Task Overview
@@ -95,6 +96,7 @@ Habit Tracker Main Menu
 │
 ├── Help
 └── Exit
+```
 
 ## Requirements
 
