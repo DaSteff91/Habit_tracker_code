@@ -38,7 +38,16 @@ class Habit:
 
     @staticmethod
     def _prepare_data(data: Dict[str, Any]) -> Dict[str, Any]:
-        """Prepare habit data for database"""
+        """
+        Prepares the habit data by adding default values for tracking.  
+        This method creates a copy of the input data dictionary and adds initialization values  
+        for habit tracking including creation timestamp, initial streak count, and streak reset counter.  
+        Args:  
+            data (Dict[str, Any]): Original habit data dictionary to be prepared  
+        Returns:  
+            Dict[str, Any]: Prepared data dictionary with added tracking fields
+        """
+        
         prepared = data.copy()
         prepared.update({
             'created': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
@@ -84,7 +93,19 @@ class Habit:
 
     @classmethod
     def get_by_id(cls, habit_id: int, db_controller: Optional[DatabaseController] = None, **kwargs) -> Optional['Habit']:
-        """Get habit by ID"""
+        """Get a habit by its ID.
+        This method retrieves a habit from the database using its ID. It can either create a new habit
+        instance with provided kwargs or fetch the habit data from the database.
+        Args:
+            habit_id (int): The unique identifier of the habit to retrieve.
+            db_controller (Optional[DatabaseController]): Database controller instance. If None, 
+                a new instance will be created.
+            **kwargs: Additional keyword arguments to create a new habit instance directly.
+        Returns:
+            Optional[Habit]: The habit instance if found or created successfully, None if not found
+            or if an error occurs.
+        """
+
         db = db_controller or DatabaseController()
         try:
             if kwargs:
