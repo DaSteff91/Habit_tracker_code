@@ -8,13 +8,37 @@ from utils.validators import HabitValidator
 
 class HabitManagementUI(BaseUI):
     """Habit management specific UI handling"""
+
+    # Table configuration
+    TABLE_HEADERS = [
+        'Row', 'Name', 'Category', 'Description',
+        'Importance', 'Repeat', 'Start Date',
+        'End Date', 'Tasks'
+    ]
+    
+    COLUMN_WIDTHS = {
+        'Row': 4,
+        'Name': 20,
+        'Category': 15,
+        'Description': 50,
+        'Importance': 10,
+        'Repeat': 8,
+        'Start Date': 12,
+        'End Date': 12,
+        'Tasks': 6
+    }
+
+    # Menu configuration
+    MENU_CHOICES = ["Create New Habit", "Update Habit", "Delete Habit"]
+    DEFAULT_WIDTH = 15
+    ITEMS_PER_PAGE = 15
     
     def __init__(self, habit_controller=None):
         """Initialize UI with controllers and configuration"""
         super().__init__()
         self.habit_controller = habit_controller or HabitController()
         self.validator = HabitValidator()
-        self.items_per_page = 15
+        self.items_per_page = self.ITEMS_PER_PAGE
 
     # Core UI Methods
     def show_habit_management(self):
@@ -83,27 +107,15 @@ class HabitManagementUI(BaseUI):
     def _initialize_table(self) -> PrettyTable:
         """Initialize table with headers"""
         table = PrettyTable()
-        table.field_names = ['Row'] + self.get_table_headers()
+        table.field_names = self.TABLE_HEADERS
         table.align = "l"
         table.hrules = 1
         return table
 
     def _configure_columns(self, table: PrettyTable) -> None:
-        """Configure column widths"""
-        max_widths = {
-            'Row': 4,
-            'Name': 20,
-            'Category': 15,
-            'Description': 50,
-            'Importance': 10,
-            'Repeat': 8,
-            'Start Date': 12,
-            'End Date': 12,
-            'Tasks': 6
-        }
-        
-        for header in table.field_names:
-            table._max_width[header] = max_widths.get(header, 15)
+            """Configure column widths"""
+            for header in table.field_names:
+                table._max_width[header] = self.COLUMN_WIDTHS.get(header, self.DEFAULT_WIDTH)
 
     def _add_habit_rows(self, table: PrettyTable, habits: List[Dict], page: int) -> Dict[int, int]:
         """Add habit rows with pagination"""
@@ -148,7 +160,18 @@ class HabitManagementUI(BaseUI):
 
     # CRUD Operations
     def create_new_habit(self):
-        """Main habit creation workflow coordinator"""
+        """
+        Creates a new habit by collecting user input, validating it, showing a summary and confirming creation.
+        This method orchestrates the complete workflow of habit creation by:
+        1. Collecting user input for the new habit
+        2. Validating and processing the input
+        3. Showing a summary of the habit to be created
+        4. Confirming with the user
+        5. Processing the final creation
+        Returns:
+            None
+        """
+
         try:
             answers = self.get_habit_input()
             if not answers:
@@ -175,7 +198,20 @@ class HabitManagementUI(BaseUI):
         return answers
 
     def get_habit_questions(self) -> List[Dict]:
-        """Get habit creation questions"""
+        """
+        This method defines the structure and content of the questions that will be
+        presented to the user when creating a new habit. Each dictionary in the list
+        represents a question with specific attributes.
+
+        Returns:
+            List[Dict]: A list of dictionaries where each dictionary contains the following keys:
+                - type (str): The type of input field ('text' or 'select')
+                - name (str): The identifier for the question
+                - message (str): The question prompt shown to the user
+                - instruction (str, optional): Additional guidance for the user
+                - choices (List[str], optional): Available options for 'select' type questions
+        """
+
         return [
             {
                 "type": "text",
@@ -234,7 +270,18 @@ class HabitManagementUI(BaseUI):
         ]
 
     def validate_and_process_input(self, answers: Dict) -> bool:
-        """Validate and process habit input"""
+        """Validates and processes the user input for habit creation.
+        This method converts the 'tasks' value to an integer and validates the habit data.
+
+        Args:
+            answers (Dict): A dictionary containing the habit information including:
+                - tasks: The number of tasks to complete (should be convertible to int)
+                - Other habit-related key-value pairs
+
+        Returns:
+            bool: True if validation succeeds, False if validation fails or type conversion fails
+        """
+
         try:
             answers['tasks'] = int(answers['tasks'])
             return self.validator.validate_habit_data(answers)
@@ -258,7 +305,17 @@ class HabitManagementUI(BaseUI):
             print("Failed to create habit.")
 
     def update_habit_workflow(self):
-        """Main update workflow coordinator"""
+        """
+        Manages the workflow for updating a habit in the habit tracking system.
+        This method coordinates the habit update process by:
+        1. Prompting for habit selection
+        2. Getting update details from user
+        3. Processing the actual update
+        Returns:
+            bool: True if update was successful, False if update failed or was cancelled
+
+        """
+
         try:
             habit_id = self.select_habit_for_update()
             if not habit_id:
@@ -308,7 +365,17 @@ class HabitManagementUI(BaseUI):
         return selected
 
     def get_update_details(self) -> Tuple[Optional[str], Optional[str]]:
-        """Get field and value for update"""
+        """Gets user input for updating a habit field.
+        This method presents a selection menu for the user to choose which field of a habit to update,
+        and then prompts for the new value of that field. It handles the input validation through
+        questionary's built-in functionality.
+        Returns:
+            Tuple[Optional[str], Optional[str]]: A tuple containing:
+                - The selected field name (without examples)
+                - The new value for the selected field
+                If user selects "Cancel", returns (None, None)
+        """
+
         field = questionary.select(
             "Select field to update:",
             choices=[
@@ -367,7 +434,16 @@ class HabitManagementUI(BaseUI):
         return False
         
     def delete_habit(self):
-        """Main deletion workflow coordinator"""
+        """
+        Manages the workflow for deleting one or multiple habits.
+        This method coordinates the habit deletion process by:
+        1. Allowing user to select habits for deletion
+        2. Confirming deletion with user
+        3. Processing the actual deletion of selected habits
+        Returns:
+            None
+        """
+
         try:
             selected_habits = self.select_habits_for_deletion()
             if not selected_habits:

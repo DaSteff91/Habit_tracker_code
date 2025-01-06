@@ -6,10 +6,47 @@ from controllers.task import TaskController
 
 class TaskUI(BaseUI):
     """Task management specific UI"""
+
+    # Table configuration
+    TABLE_HEADERS = [
+        'Row', 'Habit', 'Task #', 'Description', 'Due Date',
+        'Status', 'Streak', 'Completion Rate'  
+    ]
+    
+    COLUMN_WIDTHS = {
+        'Row': 4,
+        'Habit': 20,
+        'Task #': 6,
+        'Description': 50,
+        'Due Date': 12,
+        'Status': 8,
+        'Streak': 8,
+        'Completion Rate': 12
+    }
+    
+    # Menu configuration
+    MENU_CHOICES = [
+        "Mark tasks as done",
+        "Mark tasks as ignored",
+        "Pause habit"
+    ]
+    
+    # Task configuration
+    TASK_STATUSES = {
+        'done': 'Done',
+        'ignore': 'Ignored',
+        'pending': 'Pending',
+        'pause': 'Paused'
+    }
+    
+    # Default values
+    DEFAULT_WIDTH = 15
+    ITEMS_PER_PAGE = 10
+
     def __init__(self, task_controller=None):
         super().__init__()
         self.task_controller = task_controller or TaskController()
-        self.items_per_page = 15
+        self.items_per_page = self.ITEMS_PER_PAGE
 
     # Core UI methods
     def get_table_headers(self) -> List[str]:
@@ -175,34 +212,23 @@ class TaskUI(BaseUI):
             print("\nNo pending tasks found")
             return
                 
-        table = self._initialize_table(headers)
-        self._configure_columns(table, headers)
+        table = self._initialize_table()
+        self._configure_columns(table)
         self._add_task_rows(table, tasks, page)
         self._display_table(table)
 
-    def _initialize_table(self, headers: List[str]) -> PrettyTable:
-        """Initialize PrettyTable with headers"""
+    def _initialize_table(self) -> PrettyTable:
+        """Initialize table with headers"""
         table = PrettyTable()
-        table.field_names = headers
+        table.field_names = self.TABLE_HEADERS
         table.align = "l"
         table.hrules = 1
         return table
 
-    def _configure_columns(self, table: PrettyTable, headers: List[str]) -> None:
-        """Configure column widths and alignment"""
-        max_widths = {
-            "Row": 4,
-            "Habit Name": 20,
-            "Task Number": 6,
-            "Description": 40,
-            "Due Date": 12,
-            "Status": 8,
-            "Completion Rate": 10,
-            "Streak": 6
-        }
-        
-        for header in headers:
-            table._max_width[header] = max_widths.get(header, 15)
+    def _configure_columns(self, table: PrettyTable) -> None:
+            """Configure column widths"""
+            for header in table.field_names:
+                table._max_width[header] = self.COLUMN_WIDTHS.get(header, self.DEFAULT_WIDTH)
 
     def _add_task_rows(self, table: PrettyTable, tasks: List[Dict], page: int) -> None:
         """Add task rows to table with pagination"""
@@ -218,8 +244,8 @@ class TaskUI(BaseUI):
                 task["description"],
                 task["due_date"],
                 task["status"],
-                task["completion_rate"],
-                task["streak"]
+                task["streak"],
+                task["completion_rate"]
             ])
 
     def _display_table(self, table: PrettyTable) -> None:
