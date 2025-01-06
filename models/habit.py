@@ -263,7 +263,8 @@ class Habit:
         except Exception as e:
             print("Error deleting habit: {}".format(e))
             return False
-
+        
+    @property
     def to_dict(self) -> Dict[str, Any]:
         """Convert to database format"""
         return {
