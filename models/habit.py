@@ -124,6 +124,21 @@ class Habit:
 
     @classmethod
     def get_all(cls, db_controller: Optional[DatabaseController] = None) -> List['Habit']:
+        """Get all habits from the database.
+
+        This method retrieves all habits stored in the database and returns them as a list of Habit objects.
+
+        Args:
+            db_controller (Optional[DatabaseController]): Database controller instance to use.
+                If None, a new instance will be created.
+
+        Returns:
+            List[Habit]: List of all Habit objects in the database.
+                Returns empty list if there's an error retrieving the habits.
+
+        Raises:
+            Exception: Prints error message if database operation fails.
+        """
         """Get all habits"""
         db = db_controller or DatabaseController()
         try:
