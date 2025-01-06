@@ -80,12 +80,14 @@ Habit Tracker Main Menu
 │   ├── Mark tasks as done
 │   ├── Mark tasks as ignored
 │   ├── Pause habit
+│   ├── Previous/Next Page
 │   └── Back to Main Menu
 │
 ├── Habit Management
 │   ├── Create New Habit
 │   ├── Update Habit
 │   ├── Delete Habit
+│   ├── Previous/Next Page
 │   └── Back to Main Menu
 │
 ├── Analytics
