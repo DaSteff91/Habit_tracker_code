@@ -186,14 +186,15 @@ class Task:
             return None
  
     @classmethod
-    def create_from_habit(cls, habit_id: int, task_number: int, habit_data: Dict[str, Any]) -> Optional['Task']:
+    def create_from_habit(cls, habit_id: int, task_number: int, habit_data: Dict[str, Any], db_controller: Optional[DatabaseController] = None) -> Optional['Task']:
         """Create task from habit data"""
         try:
             task = cls(
                 habit_id=habit_id,
                 task_number=task_number,
                 task_description=habit_data['tasks_description'],
-                due_date=habit_data['start']
+                due_date=habit_data['start'],
+                db_controller = db_controller # Passes through the parameter. Inserted for testing purposes
             )
             task_id = task.save()
             if task_id:

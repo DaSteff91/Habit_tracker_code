@@ -120,6 +120,7 @@ class Habit:
         return habit
 
     # Properties and status
+
     @property
     def status(self) -> str:
         """Get current status"""
@@ -136,6 +137,7 @@ class Habit:
         return self.status == 'Active'
 
     # Database operations
+
     def save(self) -> bool:
         """Save to database"""
         try:
@@ -190,6 +192,7 @@ class Habit:
         }
 
     # Business logic
+    
     def increment_streak(self) -> bool:
         """Increment streak"""
         try:
