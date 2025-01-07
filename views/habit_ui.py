@@ -48,7 +48,7 @@ class HabitManagementUI(BaseUI):
         habits = self.get_habits_data()
         
         while True:
-            # self.clear_screen()
+            self.clear_screen()
             self.show_navigation_hint()
             
             # Display habits table first
@@ -185,6 +185,7 @@ class HabitManagementUI(BaseUI):
         """
 
         try:
+            self.clear_screen() 
             answers = self.get_habit_input()
             if not answers:
                 return
@@ -310,11 +311,17 @@ class HabitManagementUI(BaseUI):
         ).ask()
 
     def process_habit_creation(self, answers: Dict) -> None:
-        """Process actual habit creation"""
+        """Process habit creation and show feedback"""
+        self.clear_screen()
+
         if self.habit_controller.create_habit(answers):
-            print("Habit created successfully!")
+            print("\nHabit created successfully!")
+            input("\nPress Enter to continue...")
+            self.clear_screen()
         else:
-            print("Failed to create habit.")
+            print("\nFailed to create habit")
+            input("\nPress Enter to continue...")
+            self.clear_screen()
 
     def update_habit_workflow(self):
         """
@@ -329,6 +336,7 @@ class HabitManagementUI(BaseUI):
         """
 
         try:
+            self.clear_screen()
             habit_id = self.select_habit_for_update()
             if not habit_id:
                 return False
@@ -457,6 +465,7 @@ class HabitManagementUI(BaseUI):
         """
 
         try:
+            self.clear_screen() 
             selected_habits = self.select_habits_for_deletion()
             if not selected_habits:
                 return
