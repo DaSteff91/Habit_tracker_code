@@ -64,15 +64,15 @@ class TaskUI(BaseUI):
             - Navigation options depend on the total number of pages and current position
         """
 
-        page = 1  # Initialize page counter
-        tasks = self.task_controller.get_pending_tasks()
+        page = 1
         
         while True:
+            # Refresh tasks on every loop iteration
+            tasks = self.task_controller.get_pending_tasks()
             self._display_current_page(tasks, page)
             total_pages = self._calculate_total_pages(tasks)
             action = self._get_page_action(tasks, total_pages, page)
             
-            # Update page variable based on action
             page = self._handle_page_action(action, tasks, page, total_pages)
             if page is None:
                 break
@@ -179,7 +179,7 @@ class TaskUI(BaseUI):
     def _handle_page_action(self, action: str, tasks: List[Dict], page: int, total_pages: int) -> Optional[int]:
         """Handle page action selection and return new page number"""
         if action == "Back to Main Menu":
-            self._clear_screen()
+            # self._clear_screen()
             return None
         elif action == "Next Page":
             return min(page + 1, total_pages)
@@ -191,7 +191,7 @@ class TaskUI(BaseUI):
                 task_id_map = {task["row"]: task["id"] for task in tasks}
                 if self.process_task_update(selected_rows, task_id_map, action):
                     input("\nPress Enter to continue...")
-                    self._clear_screen()
+                    # self._clear_screen()
                     tasks = self.task_controller.get_pending_tasks()
             return page
 
