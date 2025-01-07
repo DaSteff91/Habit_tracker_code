@@ -17,7 +17,7 @@ class HabitController:
                 - name (str): The name of the habit
                 - description (str): A description of the habit
                 - frequency (str): How often the habit should be performed
-                - start_date (datetime): When the habit should start
+                - start (datetime): When the habit should start
                 - other habit-specific parameters as needed
         Returns:
             Optional[int]: The ID of the newly created habit if successful, None if creation fails

@@ -229,55 +229,55 @@ class HabitManagementUI(BaseUI):
             {
                 "type": "text",
                 "name": "name",
-                "message": "Enter habit name:",
+                "message": "Enter habit name (CTRL+C to cancel):",
                 "instruction": "(e.g. Morning Yoga)"
             },
             {
                 "type": "text",
                 "name": "category",
-                "message": "Enter habit category:",
+                "message": "Enter habit category (CTRL+C to cancel):",
                 "instruction": "(e.g. Health/Fitness)"
             },
             {
                 "type": "text",
                 "name": "description",
-                "message": "Enter habit description:",
+                "message": "Enter habit description (CTRL+C to cancel):",
                 "instruction": "(e.g. 15 minutes morning yoga routine)"
             },
             {
                 "type": "select",
                 "name": "importance",
-                "message": "Select importance level:",
+                "message": "Select importance level (CTRL+C to cancel):",
                 "choices": ["High", "Low"]
             },
             {
                 "type": "select",
                 "name": "repeat",
-                "message": "Select repeat interval:",
+                "message": "Select repeat interval (CTRL+C to cancel):",
                 "choices": ["Daily", "Weekly"]
             },
             {
                 "type": "text",
                 "name": "start",
-                "message": "Enter start date:",
+                "message": "Enter start date (CTRL+C to cancel):",
                 "instruction": "(Format: YYYY-MM-DD)"
             },
             {
                 "type": "text",
                 "name": "end",
-                "message": "Enter end date:",
+                "message": "Enter end date (CTRL+C to cancel):",
                 "instruction": "(Format: YYYY-MM-DD)"
             },
             {
                 "type": "text",
                 "name": "tasks",
-                "message": "Enter number of tasks:",
+                "message": "Enter number of tasks (CTRL+C to cancel):",
                 "instruction": "(Enter a number between 1-10)"
             },
             {
                 "type": "text",
                 "name": "tasks_description",
-                "message": "Enter tasks description:",
+                "message": "Enter tasks description (CTRL+C to cancel):",
                 "instruction": "(e.g. Complete one yoga session)"
             }
         ]
@@ -334,18 +334,29 @@ class HabitManagementUI(BaseUI):
             bool: True if update was successful, False if update failed or was cancelled
 
         """
-
         try:
             self._clear_screen()
             habit_id = self.select_habit_for_update()
+            
+            # Early return if user cancels habit selection
             if not habit_id:
+                self._clear_screen()  # Clear screen before returning
                 return False
                 
             field, value = self.get_update_details()
             if not field or not value:
+                self._clear_screen()  # Clear screen before returning
                 return False
                 
-            return self._process_habit_update(habit_id, field, value)
+            success = self._process_habit_update(habit_id, field, value)
+            if success:
+                print("\nHabit updated successfully!")
+            else:
+                print("\nFailed to update habit")
+            input("\nPress Enter to continue...")
+            self._clear_screen()
+            return success
+            
         except Exception as e:
             print("Error in update workflow: {}".format(e))
             return False

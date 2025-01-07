@@ -16,19 +16,19 @@ def validate_date_format(date_str: str) -> bool:
     except ValueError:
         return False
 
-def calculate_days_between(start_date: str, end_date: str) -> Optional[int]:
+def calculate_days_between(start: str, end: str) -> Optional[int]:
     """Calculate number of days between two dates.
     
     Args:
-        start_date (str): Start date in YYYY-MM-DD format
-        end_date (str): End date in YYYY-MM-DD format
+        start (str): Start date in YYYY-MM-DD format
+        end (str): End date in YYYY-MM-DD format
         
     Returns:
         Optional[int]: Number of days between dates, None if invalid dates
     """
     try:
-        start = datetime.strptime(start_date, '%Y-%m-%d').date()
-        end = datetime.strptime(end_date, '%Y-%m-%d').date()
+        start = datetime.strptime(start, '%Y-%m-%d').date()
+        end = datetime.strptime(end, '%Y-%m-%d').date()
         return (end - start).days
     except ValueError:
         return None
@@ -75,18 +75,18 @@ def format_datetime(dt: datetime) -> str:
     """Format datetime to standard string format"""
     return dt.strftime('%Y-%m-%d %H:%M:%S')
 
-def get_days_passed(start_date: str) -> int:
+def get_days_passed(start: str) -> int:
     """Calculate the number of days passed since a given start date.
 
     Args:
-        start_date (str): The start date in 'YYYY-MM-DD' format.
+        start (str): The start date in 'YYYY-MM-DD' format.
 
     Returns:
-        int: Number of days between start_date and today.
-             Returns 0 if start_date is invalid or in the future.
+        int: Number of days between start and today.
+             Returns 0 if start is invalid or in the future.
     """
     try:
-        start = datetime.strptime(start_date, '%Y-%m-%d').date()
+        start = datetime.strptime(start, '%Y-%m-%d').date()
         today = datetime.now().date()
         if start > today:
             return 0

@@ -38,16 +38,16 @@ class AnalyticsController:
         """
         return self.analytics.filter_analytics_data(data, filter_by, value)
 
-    def calculate_passed_days(self, start_date: str) -> int:
+    def calculate_passed_days(self, start: str) -> int:
         """Calculate days passed through model"""
-        return Analytics.calculate_passed_days(start_date)
+        return Analytics.calculate_passed_days(start)
 
-    def calculate_success_rate(self, start_date: str, repeat: str, streak: int, reset_count: int) -> str:
+    def calculate_success_rate(self, start: str, repeat: str, streak: int, reset_count: int) -> str:
         """
         Calculate success rate for a habit based on its parameters.
 
         Args:
-            start_date (str): The starting date of the habit in format YYYY-MM-DD
+            start (str): The starting date of the habit in format YYYY-MM-DD
             repeat (str): The repetition frequency of the habit (e.g., daily, weekly)
             streak (int): The current streak count of the habit
             reset_count (int): Number of times the habit has been reset
@@ -55,4 +55,4 @@ class AnalyticsController:
         Returns:
             str: Success rate as a percentage string (e.g., "85.5%")
         """
-        return Analytics.calculate_success_rate(start_date, repeat, streak, reset_count)
+        return Analytics.calculate_success_rate(start, repeat, streak, reset_count)
