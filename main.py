@@ -40,11 +40,11 @@ def launch_unix_terminal(script_path: str) -> bool:
     """Launch terminal on Unix-like systems"""
     os.environ['HABIT_TRACKER_RUNNING'] = '1'
     terminal_commands = [
-        ['gnome-terminal', '--', 'bash', '-c', 'HABIT_TRACKER_RUNNING=1 python3 {}; exec bash'.format(script_path)],
-        ['xterm', '-hold', '-e', 'HABIT_TRACKER_RUNNING=1 python3 {}'.format(script_path)],
-        ['konsole', '--hold', '--', 'python3', script_path]
+        ['gnome-terminal', '--', 'bash', '-c', 'HABIT_TRACKER_RUNNING=1 python3 {}; exit'.format(script_path)],
+        ['xterm', '-e', 'HABIT_TRACKER_RUNNING=1 python3 {}; exit'.format(script_path)],
+        ['konsole', '--', 'bash', '-c', 'HABIT_TRACKER_RUNNING=1 python3 {}; exit'.format(script_path)]
     ]
-    
+
     for cmd in terminal_commands:
         try:
             subprocess.run(['which', cmd[0]], check=True, capture_output=True)
@@ -62,7 +62,7 @@ def launch_windows_terminal(script_path: str) -> bool:
     """Launch terminal on Windows systems"""
     try:
         subprocess.Popen(
-            ['start', 'cmd', '/c', 'set HABIT_TRACKER_RUNNING=1 && python {}'.format(script_path)],
+            ['start', 'cmd', '/c', 'set HABIT_TRACKER_RUNNING=1 && python {} && exit'.format(script_path)],
             shell=True
         )
         return True
