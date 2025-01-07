@@ -95,8 +95,9 @@ class HabitController:
             if not habit:
                 return False
                 
-            field = field.lower().replace(' ', '_')
-            if not self.validator.validate_update(field, value, habit_id):
+            is_valid, message = self.validator.validate_update(field, value, habit_id)
+            if not is_valid:
+                print("\nValidation error: {}".format(message))
                 return False
                 
             return habit.update({field: value})

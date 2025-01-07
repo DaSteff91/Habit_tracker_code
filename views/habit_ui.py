@@ -1,7 +1,6 @@
 from typing import Dict, List, Optional, Tuple
 import questionary
 from prettytable import PrettyTable
-from datetime import datetime
 from .core import BaseUI
 from controllers.habit import HabitController
 from utils.validators import HabitValidator
@@ -454,13 +453,12 @@ class HabitManagementUI(BaseUI):
     def _process_habit_update(self, habit_id: int, field: str, value: str) -> bool:
         """Process habit update"""
         try:
-            # Only handle date fields, keep others as is
             if field == 'Start Date':
                 db_field = 'start'
             elif field == 'End Date':
                 db_field = 'end'
             else:
-                db_field = field  # No conversion needed, keep original field name
+                db_field = field
                 
             if questionary.confirm(
                 "Update {}?".format(field),
