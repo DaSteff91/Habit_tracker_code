@@ -45,16 +45,16 @@ class HabitManagementUI(BaseUI):
     def show_habit_management(self):
         """Main habit management menu controller"""
         page = 1
-        habits = self.get_habits_data()
+        habits = self._get_habits_data()
         
         while True:
-            self.clear_screen()
-            self.show_navigation_hint()
+            self._clear_screen()
+            self._show_navigation_hint()
             
             # Display habits table first
             if habits:
-                habit_id_map, _ = self.display_habits_table(habits, page)
-                total_pages = self.get_total_pages(habits, self.items_per_page)
+                habit_id_map, _ = self._display_habits_table(habits, page)
+                total_pages = self._get_total_pages(habits, self.items_per_page)
                 
             # Show menu options
             choices = ["Create New Habit", "Update Habit", "Delete Habit"]
@@ -79,7 +79,7 @@ class HabitManagementUI(BaseUI):
                 page = max(page - 1, 1)
             else:
                 self.handle_habit_management(choice)
-                habits = self.get_habits_data()  # Refresh data after action
+                habits = self._get_habits_data()  # Refresh data after action
                 page = 1  # Reset to first page
 
     def handle_habit_management(self, action: str) -> None:
@@ -92,7 +92,7 @@ class HabitManagementUI(BaseUI):
             self.delete_habit()
 
     # Display Methods
-    def display_habits_table(self, habits: List[Dict], page: int = None) -> Tuple[Dict[int, int], List[Dict]]:
+    def _display_habits_table(self, habits: List[Dict], page: int = None) -> Tuple[Dict[int, int], List[Dict]]:
         """Displays the habits in a formatted table view.
         This method creates and displays a table containing habit information using the prettytable library.
         It maps internal row numbers to actual habit IDs and handles pagination if enabled.
@@ -185,7 +185,7 @@ class HabitManagementUI(BaseUI):
         """
 
         try:
-            self.clear_screen() 
+            self._clear_screen() 
             answers = self.get_habit_input()
             if not answers:
                 return
@@ -193,7 +193,7 @@ class HabitManagementUI(BaseUI):
             if not self.validate_and_process_input(answers):
                 return
                 
-            self.show_habit_summary(answers)
+            self._show_habit_summary(answers)
             if self.confirm_creation(answers):
                 self.process_habit_creation(answers)
                 
@@ -312,16 +312,16 @@ class HabitManagementUI(BaseUI):
 
     def process_habit_creation(self, answers: Dict) -> None:
         """Process habit creation and show feedback"""
-        self.clear_screen()
+        self._clear_screen()
 
         if self.habit_controller.create_habit(answers):
             print("\nHabit created successfully!")
             input("\nPress Enter to continue...")
-            self.clear_screen()
+            self._clear_screen()
         else:
             print("\nFailed to create habit")
             input("\nPress Enter to continue...")
-            self.clear_screen()
+            self._clear_screen()
 
     def update_habit_workflow(self):
         """
@@ -336,7 +336,7 @@ class HabitManagementUI(BaseUI):
         """
 
         try:
-            self.clear_screen()
+            self._clear_screen()
             habit_id = self.select_habit_for_update()
             if not habit_id:
                 return False
@@ -345,14 +345,14 @@ class HabitManagementUI(BaseUI):
             if not field or not value:
                 return False
                 
-            return self.process_habit_update(habit_id, field, value)
+            return self._process_habit_update(habit_id, field, value)
         except Exception as e:
             print("Error in update workflow: {}".format(e))
             return False
 
     def select_habit_for_update(self) -> Optional[int]:
         """Get habit selection for update"""
-        habits = self.get_habits_data()  # This displays the table
+        habits = self._get_habits_data()  # This displays the table
         if not habits:
             print("\nNo habits found")
             return None
@@ -439,7 +439,7 @@ class HabitManagementUI(BaseUI):
         }
         return instructions.get(field, "")
 
-    def process_habit_update(self, habit_id: int, field: str, value: str) -> bool:
+    def _process_habit_update(self, habit_id: int, field: str, value: str) -> bool:
         """Process the actual update"""
         if questionary.confirm(
             "Update {}?".format(field),
@@ -465,26 +465,26 @@ class HabitManagementUI(BaseUI):
         """
 
         try:
-            self.clear_screen() 
-            selected_habits = self.select_habits_for_deletion()
+            self._clear_screen() 
+            selected_habits = self._select_habits_for_deletion()
             if not selected_habits:
                 return
                 
-            if self.confirm_deletion(selected_habits):
-                self.process_habit_deletion(selected_habits)
+            if self._confirm_deletion(selected_habits):
+                self._process_habit_deletion(selected_habits)
         except Exception as e:
             print("Error in deletion workflow: {}".format(e))
 
     # Helper Methods
-    def get_habits_data(self) -> Optional[List[Dict]]:
+    def _get_habits_data(self) -> Optional[List[Dict]]:
         """Fetch habits data through controller"""
         return self.habit_controller.get_habits()
 
-    def get_total_pages(self, habits: List[Dict], items_per_page: int) -> int:
+    def _get_total_pages(self, habits: List[Dict], items_per_page: int) -> int:
         """Calculate total pages needed"""
         return (len(habits) + items_per_page - 1) // items_per_page
 
-    def show_habit_summary(self, data: Dict) -> None:
+    def _show_habit_summary(self, data: Dict) -> None:
         """Display habit data summary"""
         print("\nHabit Summary:")
         print("-------------")
@@ -494,9 +494,9 @@ class HabitManagementUI(BaseUI):
                 value
             ))
 
-    def select_habits_for_deletion(self) -> Optional[List[int]]:
+    def _select_habits_for_deletion(self) -> Optional[List[int]]:
         """Get habit selection for deletion"""
-        habits = self.get_habits_data()
+        habits = self._get_habits_data()
         if not habits:
             print("\nNo habits found")
             return None
@@ -529,7 +529,7 @@ class HabitManagementUI(BaseUI):
             
         return selected
 
-    def confirm_deletion(self, selected_habits: List[int]) -> bool:
+    def _confirm_deletion(self, selected_habits: List[int]) -> bool:
         """Get deletion confirmation"""
         return questionary.confirm(
             "\nDelete {} habit(s)?".format(len(selected_habits)),
@@ -537,7 +537,7 @@ class HabitManagementUI(BaseUI):
             style=self.style
         ).ask()
 
-    def process_habit_deletion(self, habit_ids: List[int]) -> None:
+    def _process_habit_deletion(self, habit_ids: List[int]) -> None:
         """Execute habit deletion"""
         for habit_id in habit_ids:
             if self.habit_controller.delete_habit(habit_id):

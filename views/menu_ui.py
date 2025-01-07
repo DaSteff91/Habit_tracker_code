@@ -18,14 +18,14 @@ class MainUI(BaseUI):
         while True:
             choice = self.get_menu_choice()
             if choice == "Exit":
-                if self.confirm_exit():
+                if self._confirm_exit():
                     break
             self.handle_menu_choice(choice)
 
     def get_menu_choice(self):
         """Get main menu selection"""
-        self.clear_screen()
-        self.show_navigation_hint() 
+        self._clear_screen()
+        self._show_navigation_hint() 
         return questionary.select(
             "What would you like to do?",
             choices=[
@@ -47,22 +47,22 @@ class MainUI(BaseUI):
         elif choice == "Habit Management":
             self.habit_ui.show_habit_management()
         elif choice == "Help":
-            self.show_help()
+            self._show_help()
 
-    def show_help(self):
+    def _show_help(self):
         """Display help information"""
-        self.clear_screen()
+        self._clear_screen()
         try:
             with open('utils/help.txt', 'r') as help_file:
                 help_text = help_file.read()
                 pydoc.pager("\nHelp Documentation:\n=================\n\n" + help_text)
                 
-            self.clear_screen()
+            self._clear_screen()
             
         except Exception as e:
             print("\nError loading help documentation: {}".format(e))
 
-    def confirm_exit(self):
+    def _confirm_exit(self):
         """Confirm program exit"""
         confirmed = questionary.confirm(
             "Do you really want to exit?",
@@ -71,7 +71,7 @@ class MainUI(BaseUI):
         ).ask()
         
         if confirmed:
-            self.clear_screen()
+            self._clear_screen()
             print("Thank you for using the Habit Tracker!")
         return confirmed
 

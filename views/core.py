@@ -20,7 +20,7 @@ class BaseUI:
             ('example', 'fg:gray italic')
         ])
 
-    def clear_screen(self):
+    def _clear_screen(self):
         """Clear terminal screen and reset cursor position"""
         try:
             # Check OS and use appropriate command
@@ -33,7 +33,7 @@ class BaseUI:
             print('\n' * 100)
             print("Error clearing screen: {}".format(e))
 
-    def show_navigation_hint(self):
+    def _show_navigation_hint(self):
         """Show navigation instructions"""
         print("\nNavigation: Use ↑↓ arrow keys to move, Enter/Return to select")
 

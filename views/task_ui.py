@@ -77,7 +77,7 @@ class TaskUI(BaseUI):
             if page is None:
                 break
  
-    def get_table_headers(self) -> List[str]:
+    def _get_table_headers(self) -> List[str]:
         return [
             "Row",
             "Habit Name",
@@ -90,7 +90,7 @@ class TaskUI(BaseUI):
         ]
 
     # Display Methods
-    def display_task_table(self, headers: List[str], tasks: List[Dict], page: int) -> None:
+    def _display_task_table(self, headers: List[str], tasks: List[Dict], page: int) -> None:
         """Display paginated task table"""
         if not tasks:
             print("\nNo pending tasks found")
@@ -151,7 +151,7 @@ class TaskUI(BaseUI):
     # Navigation Methods
     def _display_current_page(self, tasks: List[Dict], page: int) -> None:
         """Display current page of tasks"""
-        self.display_task_table(self.get_table_headers(), tasks, page)
+        self._display_task_table(self._get_table_headers(), tasks, page)
 
     def _calculate_total_pages(self, tasks: List[Dict]) -> int:
         """Calculate total number of pages"""
@@ -179,7 +179,7 @@ class TaskUI(BaseUI):
     def _handle_page_action(self, action: str, tasks: List[Dict], page: int, total_pages: int) -> Optional[int]:
         """Handle page action selection and return new page number"""
         if action == "Back to Main Menu":
-            self.clear_screen()
+            self._clear_screen()
             return None
         elif action == "Next Page":
             return min(page + 1, total_pages)
@@ -191,7 +191,7 @@ class TaskUI(BaseUI):
                 task_id_map = {task["row"]: task["id"] for task in tasks}
                 if self.process_task_update(selected_rows, task_id_map, action):
                     input("\nPress Enter to continue...")
-                    self.clear_screen()
+                    self._clear_screen()
                     tasks = self.task_controller.get_pending_tasks()
             return page
 

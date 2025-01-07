@@ -37,7 +37,7 @@ class AnalyticsUI(BaseUI):
         self.current_sort = {'field': None, 'ascending': True}
         self.items_per_page = self.DEFAULT_ITEMS_PER_PAGE
 
-    def display_paginated_analytics(self, habits: List[Dict], page: int, items_per_page: int) -> None:
+    def _display_paginated_analytics(self, habits: List[Dict], page: int, items_per_page: int) -> None:
         """Display paginated analytics table"""
         if not habits:
             print("\nNo habits found")
@@ -107,15 +107,15 @@ class AnalyticsUI(BaseUI):
 
         page = 1
         ITEMS_PER_PAGE = 15
-        habits = self.get_habits_data()
+        habits = self._get_habits_data()
         
         while True:
             if not habits:
                 print("\nNo habits found")
                 break
                 
-            self.display_paginated_analytics(habits, page, ITEMS_PER_PAGE)
-            total_pages = self.get_total_pages(habits, ITEMS_PER_PAGE)
+            self._display_paginated_analytics(habits, page, ITEMS_PER_PAGE)
+            total_pages = self._get_total_pages(habits, ITEMS_PER_PAGE)
             
             choices = ["Filter Habits", "Sort Habits", "Reset View"]
             if page > 1:
@@ -137,7 +137,7 @@ class AnalyticsUI(BaseUI):
             elif action == "Previous Page":
                 page = max(page - 1, 1)
             elif action == "Reset View":
-                habits = self.get_habits_data()
+                habits = self._get_habits_data()
                 page = 1
                 self.current_sort = {'field': None, 'ascending': True}
             elif action == "Sort Habits":
@@ -148,11 +148,11 @@ class AnalyticsUI(BaseUI):
                     habits = filtered
                     page = 1
 
-    def get_habits_data(self) -> Optional[List[Dict]]:
+    def _get_habits_data(self) -> Optional[List[Dict]]:
         """Fetch habits data through controller"""
         return self.analytics_controller.get_analytics_data()
     
-    def get_total_pages(self, habits: List[tuple], items_per_page: int) -> int:
+    def _get_total_pages(self, habits: List[tuple], items_per_page: int) -> int:
         """Calculate total number of pages"""
         return (len(habits) + items_per_page - 1) // items_per_page
     
@@ -284,5 +284,5 @@ class AnalyticsUI(BaseUI):
             return self.handle_filter_habits(habits)
         elif action == "Reset View":
             self.current_sort = {'field': None, 'ascending': True}
-            return self.get_habits_data()
+            return self._get_habits_data()
         return habits
