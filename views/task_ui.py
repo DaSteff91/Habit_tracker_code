@@ -216,7 +216,7 @@ class TaskUI(BaseUI):
         selected = questionary.checkbox(
             "Select tasks to update:",
             choices=choices,
-            instruction="(Space to select, Enter to confirm)",
+            instruction="(Space to select, Enter to confirm or CRTL + C to quit)",
             style=self.style
         ).ask()
         
