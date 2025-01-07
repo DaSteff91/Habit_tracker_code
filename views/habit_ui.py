@@ -48,7 +48,7 @@ class HabitManagementUI(BaseUI):
         habits = self._get_habits_data()
         
         while True:
-            self._clear_screen()
+            # self._clear_screen()
             self._show_navigation_hint()
             
             # Display habits table first
@@ -541,6 +541,6 @@ class HabitManagementUI(BaseUI):
         """Execute habit deletion"""
         for habit_id in habit_ids:
             if self.habit_controller.delete_habit(habit_id):
-                print("Successfully deleted habit {}".format(habit_id))
+                print("Habit and associated tasks sucessfully deleted")
             else:
                 print("Failed to delete habit {}".format(habit_id))

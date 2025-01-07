@@ -23,7 +23,7 @@ class HabitValidator:
             if not habit:
                 return False
                 
-            data = habit.to_dict()
+            data = habit.to_dict
             data[field.lower()] = value
             
             is_valid, message = HabitValidator.validate_habit_data(data, updating_field=field.lower())
