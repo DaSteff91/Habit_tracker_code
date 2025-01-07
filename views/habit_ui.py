@@ -48,7 +48,7 @@ class HabitManagementUI(BaseUI):
         habits = self._get_habits_data()
         
         while True:
-            # self._clear_screen()
+            self._clear_screen()
             self._show_navigation_hint()
             
             # Display habits table first
@@ -334,6 +334,7 @@ class HabitManagementUI(BaseUI):
             bool: True if update was successful, False if update failed or was cancelled
 
         """
+
         try:
             self._clear_screen()
             habit_id = self.select_habit_for_update()
@@ -451,18 +452,26 @@ class HabitManagementUI(BaseUI):
         return instructions.get(field, "")
 
     def _process_habit_update(self, habit_id: int, field: str, value: str) -> bool:
-        """Process the actual update"""
-        if questionary.confirm(
-            "Update {}?".format(field),
-            default=False,
-            style=self.style
-        ).ask():
-            return self.habit_controller.update_habit(
-                habit_id,
-                field.lower().replace(" ", "_"),
-                value
-            )
-        return False
+        """Process habit update"""
+        try:
+            # Only handle date fields, keep others as is
+            if field == 'Start Date':
+                db_field = 'start'
+            elif field == 'End Date':
+                db_field = 'end'
+            else:
+                db_field = field  # No conversion needed, keep original field name
+                
+            if questionary.confirm(
+                "Update {}?".format(field),
+                default=False,
+                style=self.style
+            ).ask():
+                return self.habit_controller.update_habit(habit_id, db_field, value)
+            return False
+        except Exception as e:
+            print("Error updating habit: {}".format(e))
+            return False
         
     def delete_habit(self):
         """
