@@ -15,7 +15,7 @@ def launch_new_terminal():
             
     try:
         script_path = os.path.abspath(__file__)
-        if os.name == 'posix':  # Linux/Unix
+        if os.name == 'posix':  #  Works on Linux/Unix
             os.environ['HABIT_TRACKER_RUNNING'] = '1'  # Set environment flag
             terminal_commands = [
                 ['gnome-terminal', '--', 'bash', '-c', f'HABIT_TRACKER_RUNNING=1 python3 {script_path}; exec bash'],
