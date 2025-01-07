@@ -33,8 +33,6 @@ This habit tracker helps users:
 
 ## Preparation and Installation
 
-(It is assumed you already have git functionality available - otherwise [get git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) for your operating system before continuing)
-
 1. Clone the repository using git
 
 ```Bash
@@ -106,7 +104,7 @@ Habit Tracker Main Menu
 - SQLite3
 - Dependencies in requirements.txt:
     - pytest
-    - rich
+    - prettytables
     - questionary
 
 ## Code Structure
@@ -116,15 +114,23 @@ habit-tracker/
 ├── controllers/
 │   ├── habit.py
 │   └── task.py
+│ 
 ├── models/
 │   ├── habit.py
 │   └── task.py
+│ 
+├── database/
+│   ├── connector.py
+│   └── operations.py
+│ 
 ├── utils/
 │   ├── validators.py
 │   └── date_utils.py
+│ 
 ├── tests/
 ├── main.py
-└── README.md
+├── README.md
+└── requirements.txt
 ```
 
 ## Project Structure
@@ -141,6 +147,7 @@ Following the model-view-controller pattern and a seperation of concern approach
 
 SQLite database (main.db):
 
+- If not existing: Gets created when launching the main.py
 - habit table: habit definitions
 - task table: task tracking
 
