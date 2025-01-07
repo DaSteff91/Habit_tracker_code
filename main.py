@@ -136,6 +136,12 @@ class HabitTracker:
             print("Runtime error: {}".format(e))
             sys.exit(1)
 
+    def __str__(self):
+        return "Habit Tracker Application"
+        
+    def __repr__(self):
+        return "HabitTracker(db_name='{}')".format(self.db_connector.db_name)     
+
 def main():
     """Application entry point"""
     try:

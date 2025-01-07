@@ -341,11 +341,11 @@ class Habit:
         total_attempts = self.streak + self.reset_count
         return (self.streak / total_attempts) * 100 if total_attempts > 0 else 0.0
 
-    # String representations
     def __str__(self) -> str:
         """String representation"""
-        return f"{self.name} ({self.category}) - {self.status}"
+        return "{} ({}) - {}".format(self.name, self.category, self.status)
 
     def __repr__(self) -> str:
         """Detailed representation"""
-        return f"Habit(name='{self.name}', category='{self.category}', status='{self.status}')"
+        return "Habit(name='{}', category='{}', status='{}')".format(
+            self.name, self.category, self.status)
