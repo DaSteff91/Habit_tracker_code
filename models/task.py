@@ -390,12 +390,27 @@ class Task:
         db = db_controller or DatabaseController()
         habits = db.read_data('habit', {'id': habit_id})
         return habits[0] if habits else None
-
-    @staticmethod
-    def _is_past_end_date(cls, next_due: datetime, end_date: str) -> bool:
-        """Check if next due date is past habit end date"""
-        end = datetime.strptime(end_date, '%Y-%m-%d')
-        return next_due.date() > end.date()
+        
+    @classmethod
+    def _is_past_end_date(cls, next_due: datetime, end: str) -> bool:
+        """Check if next due date is past habit end date
+        
+        Args:
+            next_due (datetime): Next due date to check
+            end (str): End date string in YYYY-MM-DD format
+            
+        Returns:
+            bool: True if next_due is past end date, False otherwise
+        """
+        try:
+            if not end:
+                return False
+                
+            end_date = datetime.strptime(end, '%Y-%m-%d').date()
+            return next_due.date() > end_date
+        except ValueError as e:
+            print("Error checking end date: {}".format(e))
+            return False
 
     def set_habit_data(self, habit_name: str, streak: int) -> None:
         """Set habit-related data"""
