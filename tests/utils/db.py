@@ -94,6 +94,15 @@ class DatabaseConnectorTesting:
                 [record_id])
             self.connection.commit()
             return True
+    
+    def get_tables(self) -> List[str]:
+        """Get list of tables in database"""
+        self.cursor.execute("""
+            SELECT name FROM sqlite_master 
+            WHERE type='table'
+            ORDER BY name;
+        """)
+        return [table[0] for table in self.cursor.fetchall()]
 
     def create_test_habit(self, habit_data: Dict[str, Any]) -> int:
         """Create test habit and return ID"""
