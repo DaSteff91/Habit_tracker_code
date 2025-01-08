@@ -150,6 +150,8 @@ SQLite database (main.db):
 - If not existing: Gets created when launching the main.py
 - habit table: habit definitions
 - task table: task tracking
+- Schema and dummy data in the SQlite file
+- A dummy data creater is also provided in the project folder
 
 ## Testing
 
