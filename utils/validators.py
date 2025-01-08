@@ -23,15 +23,12 @@ class HabitValidator:
             if not habit:
                 return False
                 
-            data = habit.to_dict()
+            data = habit.to_dict
             data[field.lower()] = value
             
-            is_valid, message = HabitValidator.validate_habit_data(data, updating_field=field.lower())
-            return is_valid
-                
+            return HabitValidator.validate_habit_data(data, updating_field=field.lower())
         except Exception as e:
-            print("Error validating update: {}".format(e))
-            return False
+            return False, "Error validating update: {}".format(e)
 
     @staticmethod
     def validate_habit_data(data: Dict[str, Any], updating_field: Optional[str] = None) -> Tuple[bool, str]:
