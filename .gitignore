@@ -26,3 +26,8 @@ Backup_*/
 # OS specific
 .DS_Store
 .env
+
+# Coverage data
+.coverage
+coverage.xml
+htmlcov/
