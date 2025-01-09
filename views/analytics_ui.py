@@ -200,6 +200,7 @@ class AnalyticsUI(BaseUI):
                     self.current_sort['field'],
                     self.current_sort['ascending']
                 )
+            self._clear_screen()
         return data
 
     def handle_filter_habits(self, data: List[Dict]) -> List[Dict]:
@@ -230,7 +231,7 @@ class AnalyticsUI(BaseUI):
             values.extend(["Reset Filter", "Cancel"])
             
             value = questionary.select(
-                f"Select {field.lower()} value:",
+                "Select {} value:".format(field.lower()),
                 choices=values,
                 style=self.style
             ).ask()
@@ -239,6 +240,7 @@ class AnalyticsUI(BaseUI):
                 return data
                 
             if value == "Reset Filter":
+                self._clear_screen() 
                 return self.analytics_controller.get_analytics_data()
                 
             return self.analytics_controller.filter_data(
@@ -246,6 +248,7 @@ class AnalyticsUI(BaseUI):
                 field.lower(),
                 value
             )
+        self._clear_screen()
         return data
 
     def get_sortable_fields(self) -> List[str]:

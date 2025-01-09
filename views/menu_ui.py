@@ -55,7 +55,7 @@ class MainUI(BaseUI):
         try:
             with open('utils/help.txt', 'r') as help_file:
                 help_text = help_file.read()
-                pydoc.pager("\nHelp Documentation:\n=================\n\n" + help_text)
+                pydoc.pager("\nHelp Documentation - press q to exit:\n=================\n\n" + help_text)
                 
             self._clear_screen()
             

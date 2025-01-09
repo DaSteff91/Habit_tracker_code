@@ -33,10 +33,10 @@ This habit tracker helps users:
 
 ## Preparation and Installation
 
-1. Clone the repository using git
+1. Clone the repository using git into a folder of your choice
 
 ```Bash
-git clone [https://github.com/DaSteff91/Habit_tracker_code]
+git clone https://github.com/DaSteff91/Habit_tracker_code
 ```
 
 2. Optional: Create a virtual environment in the folder you will use the app

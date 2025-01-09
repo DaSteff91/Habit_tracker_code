@@ -179,7 +179,7 @@ class TaskUI(BaseUI):
     def _handle_page_action(self, action: str, tasks: List[Dict], page: int, total_pages: int) -> Optional[int]:
         """Handle page action selection and return new page number"""
         if action == "Back to Main Menu":
-            # self._clear_screen()
+            self._clear_screen()
             return None
         elif action == "Next Page":
             return min(page + 1, total_pages)
@@ -191,7 +191,7 @@ class TaskUI(BaseUI):
                 task_id_map = {task["row"]: task["id"] for task in tasks}
                 if self.process_task_update(selected_rows, task_id_map, action):
                     input("\nPress Enter to continue...")
-                    # self._clear_screen()
+                    self._clear_screen()
                     tasks = self.task_controller.get_pending_tasks()
             return page
 
