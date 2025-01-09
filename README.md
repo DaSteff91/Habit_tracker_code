@@ -170,6 +170,11 @@ SQLite database (main.db):
 
 ## Testing
 
+Tests are provided for the basic functionality:
+- Creating, updating and deleting a habit
+- Inceasing and resetting a streak
+- Managing tasks
+
 Run test suite:
 ```Bash
 python -m pytest tests/
