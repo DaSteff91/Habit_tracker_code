@@ -113,22 +113,37 @@ Habit Tracker Main Menu
 habit-tracker/
 ├── controllers/
 │   ├── habit.py
+│   ├── analytics.py
 │   └── task.py
 │ 
 ├── models/
 │   ├── habit.py
+│   ├── analytics.py
 │   └── task.py
+│ 
+├── views/
+│   ├── habit_ui.py
+│   ├── analytics_ui.py
+│   ├── task_ui.py
+│   ├── core.py
+│   └── menui_ui.py
 │ 
 ├── database/
 │   ├── connector.py
 │   └── operations.py
 │ 
 ├── utils/
+│   ├── help.txt
 │   ├── validators.py
 │   └── date_utils.py
 │ 
 ├── tests/
+│   ├── db.py
+│   ├── tests.py
+│   └── conftest.py
+│ 
 ├── main.py
+├── main.db
 ├── README.md
 └── requirements.txt
 ```
