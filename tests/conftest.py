@@ -1,6 +1,6 @@
 import pytest
 import os
-from tests.utils.db import DatabaseConnectorTesting
+from tests.db import DatabaseConnectorTesting
 
 @pytest.fixture
 def test_db():

@@ -1,5 +1,5 @@
 from models.habit import Habit
-from tests.utils.db import DatabaseConnectorTesting
+from tests.db import DatabaseConnectorTesting
 from typing import Any
 
 class TestHabit:
