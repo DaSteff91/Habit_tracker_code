@@ -9,8 +9,14 @@ class TaskUI(BaseUI):
 
     # Table configuration
     TABLE_HEADERS = [
-        'Row', 'Habit', 'Task #', 'Description', 'Due Date',
-        'Status', 'Streak', 'Completion Rate'  
+        "Row",
+        "Habit",
+        "Task #", 
+        "Description",
+        "Due Date",
+        "Status",
+        "Completion Rate",
+        "Streak"
     ]
     
     COLUMN_WIDTHS = {
@@ -67,12 +73,13 @@ class TaskUI(BaseUI):
         page = 1
         
         while True:
-            # Refresh tasks on every loop iteration
+            # Create task overview table first
             tasks = self.task_controller.get_pending_tasks()
             self._display_current_page(tasks, page)
             total_pages = self._calculate_total_pages(tasks)
-            action = self._get_page_action(tasks, total_pages, page)
             
+            # Show menu options
+            action = self._get_page_action(tasks, total_pages, page)
             page = self._handle_page_action(action, tasks, page, total_pages)
             if page is None:
                 break
@@ -90,7 +97,7 @@ class TaskUI(BaseUI):
         ]
 
     # Display Methods
-    def _display_task_table(self, headers: List[str], tasks: List[Dict], page: int) -> None:
+    def _display_task_table(self, tasks: List[Dict], page: int) -> None:
         """Display paginated task table"""
         if not tasks:
             print("\nNo pending tasks found")
@@ -151,7 +158,9 @@ class TaskUI(BaseUI):
     # Navigation Methods
     def _display_current_page(self, tasks: List[Dict], page: int) -> None:
         """Display current page of tasks"""
-        self._display_task_table(self._get_table_headers(), tasks, page)
+        self._clear_screen()
+        self._show_navigation_hint()
+        self._display_task_table(tasks, page)
 
     def _calculate_total_pages(self, tasks: List[Dict]) -> int:
         """Calculate total number of pages"""

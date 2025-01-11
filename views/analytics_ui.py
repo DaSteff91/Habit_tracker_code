@@ -37,12 +37,84 @@ class AnalyticsUI(BaseUI):
         self.current_sort = {'field': None, 'ascending': True}
         self.items_per_page = self.DEFAULT_ITEMS_PER_PAGE
 
+    def show_analytics_menu(self):
+        """
+        This method provides a paginated interface for viewing habit analytics,
+        with options to filter, sort, and navigate through multiple pages of habits.
+        Returns:
+            None
+        Features:
+            - Paginated display of habits (15 items per page)
+            - Filtering habits based on user criteria
+            - Sorting habits by different fields
+            - Navigation between pages
+            - Option to reset view to original state
+            - Return to main menu
+        Notes:
+            - If no habits are found, displays appropriate message and returns to main menu
+            - Pagination controls (Previous/Next) appear dynamically based on current page
+            - Current page and total pages are displayed for user reference
+        """
+
+        page = 1
+        ITEMS_PER_PAGE = 15
+        habits = self._get_habits_data()
+        
+        while True:
+            if not habits:
+                print("\nNo habits found")
+                break
+
+            # Display table first    
+            self._display_paginated_analytics(habits, page, ITEMS_PER_PAGE)
+            total_pages = self._get_total_pages(habits, ITEMS_PER_PAGE)
+            
+            # Show menu options
+            choices = ["Filter Habits", "Sort Habits", "Reset View"]
+            if page > 1:
+                choices.append("Previous Page")
+            if page < total_pages:
+                choices.append("Next Page")
+            choices.append("Back to Main Menu")
+            
+            action = questionary.select(
+                "\nPage {}/{}".format(page, total_pages),
+                choices=choices,
+                style=self.style
+            ).ask()
+            
+            if action == "Back to Main Menu":
+                break
+            elif action == "Next Page":
+                page = min(page + 1, total_pages)
+            elif action == "Previous Page":
+                page = max(page - 1, 1)
+            elif action == "Reset View":
+                habits = self._get_habits_data()
+                page = 1
+                self.current_sort = {'field': None, 'ascending': True}
+            elif action == "Sort Habits":
+                habits = self.handle_sort_habits(habits)
+            elif action == "Filter Habits":
+                filtered = self.handle_filter_habits(habits)
+                if filtered:
+                    habits = filtered
+                    page = 1
+
+    def _get_habits_data(self) -> Optional[List[Dict]]:
+        """Fetch habits data through controller"""
+        return self.analytics_controller.get_analytics_data()
+    
+    def _get_total_pages(self, habits: List[tuple], items_per_page: int) -> int:
+        """Calculate total number of pages"""
+        return (len(habits) + items_per_page - 1) // items_per_page
+
     def _display_paginated_analytics(self, habits: List[Dict], page: int, items_per_page: int) -> None:
         """Display paginated analytics table"""
         if not habits:
             print("\nNo habits found")
             return
-                
+          
         table = self._initialize_table()
         self._configure_columns(table)
         self._add_habit_rows(table, habits, page, items_per_page)
@@ -85,76 +157,6 @@ class AnalyticsUI(BaseUI):
         """Display formatted table"""
         print("\nAnalytics Overview:")
         print(table)
-
-    def show_analytics_menu(self):
-        """
-        This method provides a paginated interface for viewing habit analytics,
-        with options to filter, sort, and navigate through multiple pages of habits.
-        Returns:
-            None
-        Features:
-            - Paginated display of habits (15 items per page)
-            - Filtering habits based on user criteria
-            - Sorting habits by different fields
-            - Navigation between pages
-            - Option to reset view to original state
-            - Return to main menu
-        Notes:
-            - If no habits are found, displays appropriate message and returns to main menu
-            - Pagination controls (Previous/Next) appear dynamically based on current page
-            - Current page and total pages are displayed for user reference
-        """
-
-        page = 1
-        ITEMS_PER_PAGE = 15
-        habits = self._get_habits_data()
-        
-        while True:
-            if not habits:
-                print("\nNo habits found")
-                break
-                
-            self._display_paginated_analytics(habits, page, ITEMS_PER_PAGE)
-            total_pages = self._get_total_pages(habits, ITEMS_PER_PAGE)
-            
-            choices = ["Filter Habits", "Sort Habits", "Reset View"]
-            if page > 1:
-                choices.append("Previous Page")
-            if page < total_pages:
-                choices.append("Next Page")
-            choices.append("Back to Main Menu")
-            
-            action = questionary.select(
-                "\nPage {}/{}".format(page, total_pages),
-                choices=choices,
-                style=self.style
-            ).ask()
-            
-            if action == "Back to Main Menu":
-                break
-            elif action == "Next Page":
-                page = min(page + 1, total_pages)
-            elif action == "Previous Page":
-                page = max(page - 1, 1)
-            elif action == "Reset View":
-                habits = self._get_habits_data()
-                page = 1
-                self.current_sort = {'field': None, 'ascending': True}
-            elif action == "Sort Habits":
-                habits = self.handle_sort_habits(habits)
-            elif action == "Filter Habits":
-                filtered = self.handle_filter_habits(habits)
-                if filtered:
-                    habits = filtered
-                    page = 1
-
-    def _get_habits_data(self) -> Optional[List[Dict]]:
-        """Fetch habits data through controller"""
-        return self.analytics_controller.get_analytics_data()
-    
-    def _get_total_pages(self, habits: List[tuple], items_per_page: int) -> int:
-        """Calculate total number of pages"""
-        return (len(habits) + items_per_page - 1) // items_per_page
     
     def handle_sort_habits(self, data: List[Dict]) -> List[Dict]:
         """
