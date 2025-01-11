@@ -16,10 +16,6 @@ class BaseUI:
         _init_style(): Initializes the UI style configuration with predefined color schemes.
         _clear_screen(): Clears the terminal screen in a cross-platform manner.
         _show_navigation_hint(): Displays navigation instructions for the user.
-        confirm_action(message: str, default: bool = False) -> bool: 
-            Creates a confirmation dialog for user input.
-        select_option(message: str, choices: List[str]) -> Optional[str]: 
-            Creates a selection dialog with multiple choices.
     """
 
     def __init__(self):
