@@ -139,7 +139,7 @@ habit-tracker/
 │ 
 ├── tests/
 │   ├── db.py
-│   ├── tests.py
+│   ├── tests/
 │   └── conftest.py
 │ 
 ├── main.py
