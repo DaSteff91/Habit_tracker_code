@@ -30,24 +30,9 @@ class TaskUI(BaseUI):
         'Completion Rate': 12
     }
     
-    # Menu configuration
-    MENU_CHOICES = [
-        "Mark tasks as done",
-        "Mark tasks as ignored",
-        "Pause habit"
-    ]
-    
-    # Task configuration
-    TASK_STATUSES = {
-        'done': 'Done',
-        'ignore': 'Ignored',
-        'pending': 'Pending',
-        'pause': 'Paused'
-    }
-    
     # Default values
     DEFAULT_WIDTH = 15
-    ITEMS_PER_PAGE = 10
+    ITEMS_PER_PAGE = 15
 
     # Initialization
     def __init__(self, task_controller=None):
@@ -111,7 +96,6 @@ class TaskUI(BaseUI):
     def _display_table(self, table: PrettyTable) -> None:
         """
         Display the task overview table in the console.
-
         This method prints a formatted table showing task-related information to the console output.
 
         Args:
