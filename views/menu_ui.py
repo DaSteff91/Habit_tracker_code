@@ -6,7 +6,7 @@ import questionary
 import pydoc
 
 class MainUI(BaseUI):
-    """Main menu and program flow"""
+    """Main menu and program flow using controller injection."""
     def __init__(self, habit_controller=None, task_controller=None, analytics_controller=None):
         super().__init__()
         self.habit_ui = HabitManagementUI(habit_controller)
