@@ -54,18 +54,4 @@ class BaseUI:
         """Show navigation instructions"""
         print("\nNavigation: Use ↑↓ arrow keys to move, Enter/Return to select")
 
-    def confirm_action(self, message: str, default: bool = False) -> bool:
-        """Generic confirmation dialog"""
-        return questionary.confirm(
-            message,
-            default=default,
-            style=self.style
-        ).ask()
 
-    def select_option(self, message: str, choices: List[str]) -> Optional[str]:
-        """Generic selection dialog"""
-        return questionary.select(
-            message,
-            choices=choices,
-            style=self.style
-        ).ask()
