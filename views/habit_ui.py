@@ -133,6 +133,7 @@ class HabitManagementUI(BaseUI):
         start_idx = (page - 1) * self.items_per_page if page else 0
         end_idx = start_idx + self.items_per_page if page else len(habits)
         page_habits = habits[start_idx:end_idx]
+        # Implementing a mapping of row number to habit ID
         start_count = start_idx + 1
         
         habit_id_map = {}
