@@ -78,8 +78,8 @@ class HabitManagementUI(BaseUI):
                 page = max(page - 1, 1)
             else:
                 self.handle_habit_management(choice)
-                habits = self._get_habits_data()  # Refresh data after action
-                page = 1  # Reset to first page
+                habits = self._get_habits_data()
+                page = 1
 
     def handle_habit_management(self, action: str) -> None:
         """Route management actions"""
@@ -155,7 +155,7 @@ class HabitManagementUI(BaseUI):
     def _display_table(self, table: PrettyTable) -> None:
         """Display formatted table"""
         print("\nHabits Overview:")
-        print(table)
+        print(table) # This displays the table in the UI
 
     def get_table_headers(self) -> List[str]:
         """Get table headers"""
@@ -186,7 +186,7 @@ class HabitManagementUI(BaseUI):
 
         try:
             self._clear_screen() 
-            answers = self.get_habit_input()
+            answers = self.get_habit_input()    # answers is a dictionary containing habit data from user input
             if not answers:
                 return
                 
@@ -208,7 +208,7 @@ class HabitManagementUI(BaseUI):
         if not answers:
             return None
             
-        return answers
+        return answers 
 
     def get_habit_questions(self) -> List[Dict]:
         """
@@ -341,12 +341,13 @@ class HabitManagementUI(BaseUI):
             
             # Early return if user cancels habit selection
             if not habit_id:
-                self._clear_screen()  # Clear screen before returning
+                self._clear_screen()
                 return False
-                
+        
+            # Saves the field and value for updating the habit. Both were entered by the user
             field, value = self.get_update_details()
             if not field or not value:
-                self._clear_screen()  # Clear screen before returning
+                self._clear_screen()
                 return False
                 
             success = self._process_habit_update(habit_id, field, value)
@@ -363,13 +364,13 @@ class HabitManagementUI(BaseUI):
             return False
 
     def select_habit_for_update(self) -> Optional[int]:
-        """Get habit selection for update"""
-        habits = self._get_habits_data()  # This displays the table
+        """Get (multiple) habit selection for update"""
+        habits = self._get_habits_data()
         if not habits:
             print("\nNo habits found")
             return None
         
-        # Create choices with row numbers
+        # Saves the user choices in a choices variable based on their row numbers
         choices = [
             {
                 "name": "Row {}: {} - {}".format(
@@ -454,6 +455,7 @@ class HabitManagementUI(BaseUI):
     def _process_habit_update(self, habit_id: int, field: str, value: str) -> bool:
         """Process habit update"""
         try:
+            # extra handling for date fields
             if field == 'Start Date':
                 db_field = 'start'
             elif field == 'End Date':
@@ -531,6 +533,7 @@ class HabitManagementUI(BaseUI):
             for idx, habit in enumerate(habits, 1)
         ]
         choices.append({
+            # This enables to cancel the deletion process
             "name": "Cancel",
             "value": "cancel",
             "checked": False

@@ -39,35 +39,29 @@ class AnalyticsUI(BaseUI):
 
     def show_analytics_menu(self):
         """
-        This method provides a paginated interface for viewing habit analytics,
-        with options to filter, sort, and navigate through multiple pages of habits.
+        Display and manage the analytics menu for habit tracking.
+        This method implements a paginated view of habit analytics with various control options.
+        It allows users to navigate through pages of habits, apply filters, sort data, and
+        reset the view to its original state.
         Returns:
             None
-        Features:
-            - Paginated display of habits (15 items per page)
-            - Filtering habits based on user criteria
-            - Sorting habits by different fields
-            - Navigation between pages
-            - Option to reset view to original state
-            - Return to main menu
         Notes:
-            - If no habits are found, displays appropriate message and returns to main menu
-            - Pagination controls (Previous/Next) appear dynamically based on current page
-            - Current page and total pages are displayed for user reference
+        - Automatically handles empty habit lists
+        - Resets to first page when data is filtered or sorted
+        - Maintains page boundaries within valid range
         """
 
         page = 1
-        ITEMS_PER_PAGE = 15
         habits = self._get_habits_data()
         
         while True:
             if not habits:
                 print("\nNo habits found")
+                input("\nPress Enter to continue...")
                 break
 
-            # Display table first    
-            self._display_paginated_analytics(habits, page, ITEMS_PER_PAGE)
-            total_pages = self._get_total_pages(habits, ITEMS_PER_PAGE)
+            self._display_paginated_analytics(habits, page, self.DEFAULT_ITEMS_PER_PAGE)
+            total_pages = self._get_total_pages(habits, self.DEFAULT_ITEMS_PER_PAGE)
             
             # Show menu options
             choices = ["Filter Habits", "Sort Habits", "Reset View"]
@@ -89,17 +83,11 @@ class AnalyticsUI(BaseUI):
                 page = min(page + 1, total_pages)
             elif action == "Previous Page":
                 page = max(page - 1, 1)
-            elif action == "Reset View":
-                habits = self._get_habits_data()
-                page = 1
-                self.current_sort = {'field': None, 'ascending': True}
-            elif action == "Sort Habits":
-                habits = self.handle_sort_habits(habits)
-            elif action == "Filter Habits":
-                filtered = self.handle_filter_habits(habits)
-                if filtered:
-                    habits = filtered
-                    page = 1
+            else:
+                # Handle all other actions through process_analytics_action
+                habits = self.process_analytics_action(habits, action)
+                if action in ["Filter Habits", "Sort Habits", "Reset View"]:
+                    page = 1  # Reset page when data changes
 
     def _get_habits_data(self) -> Optional[List[Dict]]:
         """Fetch habits data through controller"""
@@ -156,7 +144,18 @@ class AnalyticsUI(BaseUI):
     def _display_table(self, table: PrettyTable) -> None:
         """Display formatted table"""
         print("\nAnalytics Overview:")
-        print(table)
+        print(table) # This is to display the table in the UI
+
+    def process_analytics_action(self, habits: List[tuple], action: str) -> List[tuple]:
+        """Process selected analytics action"""
+        if action == "Sort Habits":
+            return self.handle_sort_habits(habits)
+        elif action == "Filter Habits":
+            return self.handle_filter_habits(habits)
+        elif action == "Reset View":
+            self.current_sort = {'field': None, 'ascending': True}
+            return self._get_habits_data()
+        return habits
     
     def handle_sort_habits(self, data: List[Dict]) -> List[Dict]:
         """
@@ -179,6 +178,7 @@ class AnalyticsUI(BaseUI):
             style=self.style
         ).ask()
         
+        # This is to handle the case where user cancels the sort operation
         if sort_by == "Cancel":
             return data
             
@@ -225,6 +225,7 @@ class AnalyticsUI(BaseUI):
             style=self.style
         ).ask()
         
+        # This is to handle the case where user cancels the filter operation
         if field == "Cancel":
             return data
             
@@ -281,13 +282,3 @@ class AnalyticsUI(BaseUI):
             return []
         return sorted(set(habit[key] for habit in habits))
     
-    def process_analytics_action(self, habits: List[tuple], action: str) -> List[tuple]:
-        """Process selected analytics action"""
-        if action == "Sort Habits":
-            return self.handle_sort_habits(habits)
-        elif action == "Filter Habits":
-            return self.handle_filter_habits(habits)
-        elif action == "Reset View":
-            self.current_sort = {'field': None, 'ascending': True}
-            return self._get_habits_data()
-        return habits
