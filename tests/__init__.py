@@ -1,10 +1,9 @@
 """Test suite for Habit Tracker Application
 
 This package contains test modules for:
-- Models (habit, task, analytics)
-- Controllers (habit, task, analytics)
-- Database operations
-- Analytics calculations
+- Habit management
+- Task management
+- Analytics
 
 Test Configuration:
 - Uses pytest framework
@@ -21,4 +20,3 @@ sys.path.insert(0, project_root)
 
 # Test configuration
 TEST_DB = "test.db"
-ITEMS_PER_PAGE = 15

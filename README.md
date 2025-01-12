@@ -170,7 +170,7 @@ SQLite database (main.db):
 
 ## Testing
 
-Tests are provided for the basic functionality:
+Tests are provided for the basic functionality of the app:
 - Creating, updating and deleting a habit
 - Inceasing and resetting a streak
 - Managing tasks
@@ -178,8 +178,20 @@ Tests are provided for the basic functionality:
 
 Run test suite:
 ```Bash
-python -m pytest tests/
+# Run with detailed output
+python -m pytest -v tests/
+
+# Run specific test category
+python -m pytest tests/test_models/test_habit.py
+python -m pytest tests/test_models/test_task.py
+python -m pytest tests/test_models/test_analytics.py
 ```
+
+## Test Environment
+- Uses isolated SQLite test database (test.db)
+- Auto-creates/removes test database for each session
+- Includes fixtures for common test data
+
 ## License
 
 MIT License - See LICENSE for details

@@ -1,4 +1,3 @@
-from datetime import datetime
 from models.analytics import Analytics
 from tests.db import DatabaseConnectorTesting
 from typing import Dict, Any
