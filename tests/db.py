@@ -1,5 +1,6 @@
 import sqlite3
 from typing import Optional, List, Tuple, Dict, Any
+from datetime import datetime
 
 class DatabaseConnectorTesting:
     """Test-specific database connector"""
@@ -69,10 +70,10 @@ class DatabaseConnectorTesting:
 
     def read_data(self, table: str, conditions: Dict = None) -> List[Tuple]:
         """Read test data"""
-        query = f"SELECT * FROM {table}"
+        query = "SELECT * FROM {}".format(table)   
         if conditions:
             where = ' AND '.join([f"{k}=?" for k in conditions])
-            query += f" WHERE {where}"
+            query += " WHERE {}".format(where) 
             self.cursor.execute(query, list(conditions.values()))
         else:
             self.cursor.execute(query)
@@ -110,7 +111,28 @@ class DatabaseConnectorTesting:
 
     def create_test_task(self, task_data: Dict[str, Any]) -> int:
         """Create test task and return ID"""
-        return self.create_data('task', task_data)
+        # Validate data format before insertion
+        required_format = {
+            'habit_id': int,
+            'task_number': int,
+            'task_description': str,
+            'due_date': str, 
+            'status': str,    
+            'created': str    
+        }
+        
+        # Ensure correct data format
+        formatted_data = {
+            'habit_id': task_data['habit_id'],
+            'task_number': task_data['task_number'],
+            'task_description': task_data['task_description'],
+            'due_date': task_data['due_date'],
+            'status': 'pending',
+            'created': datetime.now().strftime('%Y-%m-%d')
+        }
+        
+        # Create record
+        return self.create_data('task', formatted_data)
 
     def create_test_habit_with_tasks(self, habit_data: Dict[str, Any], 
                                    task_data: Dict[str, Any]) -> Tuple[int, int]:

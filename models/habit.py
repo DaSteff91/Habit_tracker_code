@@ -4,17 +4,21 @@ from database.operations import DatabaseController
 class Habit:
     """Habit data model with database operations and business logic"""
     def __init__(self, 
-                 name: str,
-                 category: str,
-                 description: str,
-                 start: str,
-                 end: str,
-                 importance: str,
-                 repeat: str,
-                 tasks: int,
-                 tasks_description: str,
-                 habit_id: int = None,
-                 db_controller: Optional[DatabaseController] = None):
+                name: str,
+                category: str,
+                description: str,
+                start: str,
+                end: str,
+                importance: str,
+                repeat: str,
+                tasks: int,
+                tasks_description: str,
+                created: str = None,
+                streak: int = 0,
+                streak_reset_count: int = 0,
+                longest_streak: int = 0,
+                habit_id: int = None,
+                db_controller: Optional[DatabaseController] = None):
         # Core properties
         self.id = habit_id
         self.name = name
@@ -26,10 +30,10 @@ class Habit:
         self.repeat = repeat
         self.tasks = tasks
         self.tasks_description = tasks_description
-        self.streak = 0
-        self.longest_streak = 0
-        self.reset_count = 0
-        self.created = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        self.created = created or datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        self.streak = streak
+        self.reset_count = streak_reset_count
+        self.longest_streak = longest_streak
         self.db_controller = db_controller or DatabaseController()
 
     # Class methods for creation/retrieval
@@ -159,8 +163,7 @@ class Habit:
         Returns:
             Habit: A new Habit instance populated with the database values
         """
-        
-        habit = cls(
+        return cls(
             habit_id=db_tuple[0],
             name=db_tuple[1],
             category=db_tuple[2],
@@ -170,13 +173,12 @@ class Habit:
             importance=db_tuple[7],
             repeat=db_tuple[8],
             tasks=db_tuple[9],
-            tasks_description=db_tuple[10]
+            tasks_description=db_tuple[10],
+            created=db_tuple[4],
+            streak=db_tuple[11],
+            streak_reset_count=db_tuple[12],
+            longest_streak=db_tuple[13]
         )
-        # Set additional properties
-        habit.streak = db_tuple[11]
-        habit.reset_count = db_tuple[12]
-        habit.created = db_tuple[4]
-        return habit
 
     # Properties and status
 

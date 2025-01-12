@@ -245,7 +245,8 @@ class AnalyticsUI(BaseUI):
             if value == "Reset Filter":
                 self._clear_screen() 
                 return self.analytics_controller.get_analytics_data()
-                
+
+            # This returns the filtered data based on the selected field and value by the user    
             return self.analytics_controller.filter_data(
                 data,
                 field.lower(),
