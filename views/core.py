@@ -29,7 +29,7 @@ class BaseUI:
             ('answer', 'fg:green bold'),
             ('pointer', 'fg:yellow bold'),
             ('selected', 'fg:green'),
-            ('instruction', 'fg:blue'),
+            ('instruction', 'fg:cyan'),
             ('example', 'fg:gray italic')
         ])
 
