@@ -87,10 +87,10 @@ class DatabaseConnector:
             int: The ID of the last row inserted if successful, -1 if an error occurs.
         """
         try:
-            columns = ', '.join(data.keys())    # Creates a comma-separated string of keys
-            placeholders = ', '.join(['?' for _ in data]) # Creates a comma-separated string of question marks to prevent SQL injection
+            columns = ', '.join(data.keys())
+            placeholders = ', '.join(['?' for _ in data]) # ? to prevent SQL injection
             query = "INSERT INTO {} ({}) VALUES ({})".format(table, columns, placeholders)
-            self.cursor.execute(query, list(data.values())) # list() creates a list of the values from the dictionary. The execute functions takes both, the created SQL statement ant the respective value from the data
+            self.cursor.execute(query, list(data.values()))
             self.connection.commit()
             return self.cursor.lastrowid
         except sqlite3.Error as e:

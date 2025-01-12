@@ -41,7 +41,7 @@ class Task:
                 'habit', 
                 {'id': self.habit_id}
             )[0]
-            return habit[11]  # streak field
+            return habit[11]
         except Exception as e:
             print("Error getting streak: {}".format(e))
             return 0
@@ -54,8 +54,8 @@ class Task:
                 'task',
                 {'habit_id': self.habit_id, 'due_date': self.due_date}
             )
-            if not total_tasks or len(total_tasks) <= 1:  # Check for single task
-                return ""  # Empty string for single tasks
+            if not total_tasks or len(total_tasks) <= 1:
+                return ""
                 
             completed = len([t for t in total_tasks if t[6] == 'done'])
             rate = (completed / len(total_tasks)) * 100
@@ -278,7 +278,7 @@ class Task:
                 task = cls(
                     habit_id=habit_id,
                     task_number=task_num,
-                    task_description=habit[10],  # tasks_description
+                    task_description=habit[10],
                     due_date=next_due.strftime('%Y-%m-%d')
                 )
                 if not task.save():

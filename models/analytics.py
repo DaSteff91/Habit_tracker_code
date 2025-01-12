@@ -155,16 +155,7 @@ class Analytics:
         during sorting.
         Args:
             data (List[Dict]): A list of dictionaries containing habit analytics data.
-            sort_by (str): The field to sort by. Valid values are:
-                - 'name'
-                - 'category'
-                - 'description'
-                - 'repeat'
-                - 'days_passed'
-                - 'success_rate'
-                - 'current_streak'
-                - 'reset_count'
-                - 'status'
+            sort_by (str): The field to sort by.
             ascending (bool, optional): Sort order. True for ascending, False for descending. 
                 Defaults to True.
         Returns:
@@ -241,7 +232,7 @@ class Analytics:
         
         grouped = {}
         for task in tasks:
-            due_date = task[5]  # due_date field
+            due_date = task[5]
             
             if repeat == 'Weekly':
                 # Get week start date

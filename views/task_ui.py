@@ -1,4 +1,4 @@
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Optional
 import questionary
 from prettytable import PrettyTable
 from .core import BaseUI

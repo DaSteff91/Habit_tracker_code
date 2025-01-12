@@ -13,7 +13,7 @@ class TaskController:
         """Initialize controller"""
         self.validator = TaskValidator()
         self.habit_controller = HabitController()
-        self.db_controller = db_controller  # Store db_controller
+        self.db_controller = db_controller
         self.status_map = {
             "Mark tasks as done": "done",
             "Mark tasks as ignored": "ignore",
@@ -39,7 +39,6 @@ class TaskController:
             task = Task.get_by_id(task_id)
             if task:
                 related_tasks = Task.get_tasks_for_habit(task.habit_id, task.due_date)
-                # Filter for pending AND different task ID
                 pending_tasks = [t for t in related_tasks 
                                if t.status == 'pending' and t.id != task_id]
                 if pending_tasks:
