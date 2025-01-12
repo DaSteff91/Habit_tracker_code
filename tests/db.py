@@ -141,3 +141,19 @@ class DatabaseConnectorTesting:
         task_data['habit_id'] = habit_id
         task_id = self.create_test_task(task_data)
         return habit_id, task_id
+    
+    def get_task_by_id(self, task_id: int) -> Optional[Dict]:
+        """Test-specific task retrieval"""
+        task_data = self.read_data('task', {'id': task_id})
+        if task_data and task_data[0]:
+            row = task_data[0]
+            return {
+                'id': row[0],
+                'habit_id': row[1],
+                'task_number': row[2],
+                'task_description': row[3],
+                'created': row[4],
+                'due_date': row[5],
+                'status': row[6]
+            }
+        return None

@@ -15,8 +15,8 @@ class TaskUI(BaseUI):
         "Description",
         "Due Date",
         "Status",
-        "Completion Rate",
-        "Streak"
+        "Streak",
+        "Completion Rate"
     ]
     
     COLUMN_WIDTHS = {
@@ -77,8 +77,8 @@ class TaskUI(BaseUI):
             "Description",
             "Due Date",
             "Status",
-            "Completion Rate",
-            "Streak"
+            "Streak",
+            "Completion Rate"
         ]
 
     # Display Methods

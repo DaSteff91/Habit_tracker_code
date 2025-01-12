@@ -21,25 +21,6 @@ class TestAnalytics:
             assert 'name' in data[0]
             assert 'success_rate' in data[0]
 
-    def _create_test_habit(self, test_db: DatabaseConnectorTesting) -> int:
-        """Create test habit for analytics"""
-        habit_data = {
-            'name': 'Test Habit',
-            'category': 'Health',
-            'description': 'Test Description',
-            'start': '2024-01-01',
-            'end': '2024-12-31',
-            'importance': 'High',
-            'repeat': 'Daily',
-            'tasks': 1,
-            'tasks_description': 'Test Task',
-            'created': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'streak': 0,
-            'streak_reset_count': 0,
-            'longest_streak': 0
-        }
-        return test_db.create_test_habit(habit_data)
-
     def test_data_filtering(self, test_db: DatabaseConnectorTesting, sample_habit_data: Dict[str, Any]):
         """Test analytics data filtering"""
         # Arrange

@@ -102,8 +102,8 @@ class Task:
 
         """
 
-        db = db_controller or DatabaseController()
         try:
+            db = db_controller or DatabaseController()
             task_data = db.read_data('task', {'id': task_id})
             if not task_data:
                 return None
