@@ -31,3 +31,5 @@ Backup_*/
 .coverage
 coverage.xml
 htmlcov/
+importtime.log
+main.db
