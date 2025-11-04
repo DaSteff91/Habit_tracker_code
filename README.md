@@ -5,6 +5,7 @@ A command-line application to help users create, track, and analyze habits syste
 ## Purpose
 
 This habit tracker helps users:
+
 - Create and manage habits with customizable tasks
 - Track daily/weekly progress
 - Monitor habit streaks and success rates
@@ -13,12 +14,14 @@ This habit tracker helps users:
 ## Features
 
 - **Habit Management**
+
   - Create habits with multiple tasks for tracking
   - Set importance levels and repeat intervals
   - Categorization for fine tuning
   - Updating and deleting always possible
 
 - **Task Tracking**
+
   - Mark tasks as done/ignored
   - Multi-selection
   - Pause habits temporarily
@@ -51,19 +54,29 @@ source .venv/bin/activate
 ```Bash
 pip install -r requirements.txt
 ```
+
 ## Usage
 
 1. Start the application using
+
 ```Bash
 python main.py
 ```
 
+or open the app in a new terminal window (if supported by your OS):
+
+```Bash
+python3 main.py --new-terminal
+```
+
 2. Navigation in the menu
+
 - Arrow keys (↑↓) for menu selection
 - Enter to confirm
 - Space for multiple selection
 
 3. Workflow for Tracking
+
 - Create habits in Habit Management
 - Track tasks in Task Overview
 - Check progress in Analytics
@@ -103,9 +116,9 @@ Habit Tracker Main Menu
 - Python 3.12+
 - SQLite3
 - Dependencies in requirements.txt:
-    - pytest
-    - prettytables
-    - questionary
+  - pytest
+  - prettytables
+  - questionary
 
 ## Code Structure
 
@@ -115,33 +128,33 @@ habit-tracker/
 │   ├── habit.py
 │   ├── analytics.py
 │   └── task.py
-│ 
+│
 ├── models/
 │   ├── habit.py
 │   ├── analytics.py
 │   └── task.py
-│ 
+│
 ├── views/
 │   ├── habit_ui.py
 │   ├── analytics_ui.py
 │   ├── task_ui.py
 │   ├── core.py
 │   └── menui_ui.py
-│ 
+│
 ├── database/
 │   ├── connector.py
 │   └── operations.py
-│ 
+│
 ├── utils/
 │   ├── help.txt
 │   ├── validators.py
 │   └── date_utils.py
-│ 
+│
 ├── tests/
 │   ├── db.py
 │   ├── tests/
 │   └── conftest.py
-│ 
+│
 ├── main.py
 ├── main.db
 ├── README.md
@@ -151,6 +164,7 @@ habit-tracker/
 ## Project Structure
 
 Following the model-view-controller pattern and a seperation of concern approach using
+
 - models: Database access layer and business logic
 - views: Taking care of the user interface
 - controllers: Maintaining interactions between models and views
@@ -171,12 +185,14 @@ SQLite database (main.db):
 ## Testing
 
 Tests are provided for the basic functionality of the app:
+
 - Creating, updating and deleting a habit
 - Inceasing and resetting a streak
 - Managing tasks
 - Analytics menu functionality
 
 Run test suite:
+
 ```Bash
 # Run with detailed output
 python -m pytest -v tests/
@@ -188,6 +204,7 @@ python -m pytest tests/test_models/test_analytics.py
 ```
 
 ## Test Environment
+
 - Uses isolated SQLite test database (test.db)
 - Auto-creates/removes test database for each session
 - Includes fixtures for common test data
